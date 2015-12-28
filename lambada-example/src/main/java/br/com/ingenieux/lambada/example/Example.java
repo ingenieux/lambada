@@ -4,7 +4,7 @@ import com.amazonaws.services.lambda.runtime.Context;
 import io.ingenieux.lambada.ann.LambadaFunction;
 
 public class Example {
-    @LambadaFunction(timeout=5)
+    @LambadaFunction(timeout=15)
     public String sayHello(String whom, Context ctx) {
         return String.format("Hello, %s!", whom);
     }

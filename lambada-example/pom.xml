@@ -127,8 +127,17 @@
             <id>deploy</id>
             <properties>
                 <maven.deploy.skip>true</maven.deploy.skip>
+                <maven.install.skip>true</maven.install.skip>
+                <maven.test.skip>true</maven.test.skip>
+
+                <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
+                <beanstalk.versionLabel>${maven.build.timestamp}</beanstalk.versionLabel>
+                <beanstalk.s3Bucket>ingenieux-images</beanstalk.s3Bucket>
+                <beanstalk.s3Key>apps/${project.artifactId}/${project.build.finalName}-${beanstalk.versionLabel}.zip</beanstalk.s3Key>
+                <beanstalk.artifactFile>${project.build.directory}/${project.build.finalName}.jar</beanstalk.artifactFile>
             </properties>
             <build>
+                <defaultGoal>deploy</defaultGoal>
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
@@ -155,6 +164,41 @@
                                 </configuration>
                             </execution>
                         </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>br.com.ingenieux</groupId>
+                        <artifactId>beanstalk-maven-plugin</artifactId>
+                        <version>1.4.2-SNAPSHOT</version>
+                        <executions>
+                            <execution>
+                                <id>deploy</id>
+                                <phase>deploy</phase>
+                                <goals>
+                                    <goal>upload-source-bundle</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <multipartUpload>false</multipartUpload>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>br.com.ingenieux</groupId>
+                        <artifactId>lambda-maven-plugin</artifactId>
+                        <version>1.4.2-SNAPSHOT</version>
+                        <executions>
+                            <execution>
+                                <id>deploy</id>
+                                <phase>deploy</phase>
+                                <goals>
+                                    <goal>deploy-functions</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <s3Url>s3://${beanstalk.s3Bucket}/${beanstalk.s3Key}</s3Url>
+                            <definitionFile>${project.build.outputDirectory}/META-INF/lambada/lambada-functions.json</definitionFile>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>
