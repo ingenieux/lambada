@@ -34,68 +34,12 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.codehaus.gmavenplus</groupId>
-                <artifactId>gmavenplus-plugin</artifactId>
-                <version>1.5</version>
-                <executions>
-                    <execution>
-                        <phase>process-classes</phase>
-                        <goals>
-                            <goal>execute</goal>
-                        </goals>
-                        <configuration>
-                            <scripts>
-                                <script>
-                                    <![CDATA[
-                        def reflectionsPath = "${project.build.outputDirectory}/META-INF/reflections/lambada-example-reflections.xml"
-                        def outputPath = "${project.build.outputDirectory}/META-INF/lambada/lambada-functions.json"
-
-                        new File(outputPath).getParentFile().mkdirs()
-
-                        new org.reflections.Reflections(new org.reflections.util.ConfigurationBuilder()
-                                          .addUrls(org.reflections.util.ClasspathHelper.forPackage("${lambada.package}"))
-                                          .setScanners(new org.reflections.scanners.MethodAnnotationsScanner())).
-                            save(reflectionsPath)
-
-                        new io.ingenieux.lambada.generator.LambadaGenerator(new FileInputStream(reflectionsPath), new FileOutputStream(outputPath)).execute()
-                    ]]>
-                                </script>
-                            </scripts>
-                        </configuration>
-                    </execution>
-                </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.codehaus.groovy</groupId>
-                        <artifactId>groovy-all</artifactId>
-                        <version>2.4.3</version>
-                        <scope>runtime</scope>
-                    </dependency>
-
-                    <dependency>
-                        <groupId>javax.servlet</groupId>
-                        <artifactId>javax.servlet-api</artifactId>
-                        <version>3.0.1</version>
-                    </dependency>
-
-                    <dependency>
-                        <groupId>dom4j</groupId>
-                        <artifactId>dom4j</artifactId>
-                        <version>1.6</version>
-                    </dependency>
-
-                    <dependency>
-                        <groupId>org.reflections</groupId>
-                        <artifactId>reflections</artifactId>
-                        <version>0.9.10</version>
-                    </dependency>
-
-                    <dependency>
-                        <groupId>io.ingenieux.lambada</groupId>
-                        <artifactId>lambada-generator</artifactId>
-                        <version>${project.version}</version>
-                    </dependency>
-                </dependencies>
+                <groupId>io.ingenieux.lambada</groupId>
+                <artifactId>lambada-maven-plugin</artifactId>
+                <version>${project.version}</version>
+                <goals>
+                    <goal>generate</goal>
+                </goals>
             </plugin>
         </plugins>
     </build>
@@ -117,7 +61,7 @@
 
         <dependency>
             <groupId>io.ingenieux.lambada</groupId>
-            <artifactId>lambada-core</artifactId>
+            <artifactId>lambada-runtime</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
@@ -133,8 +77,10 @@
                 <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
                 <beanstalk.versionLabel>${maven.build.timestamp}</beanstalk.versionLabel>
                 <beanstalk.s3Bucket>ingenieux-images</beanstalk.s3Bucket>
-                <beanstalk.s3Key>apps/${project.artifactId}/${project.build.finalName}-${beanstalk.versionLabel}.zip</beanstalk.s3Key>
-                <beanstalk.artifactFile>${project.build.directory}/${project.build.finalName}.jar</beanstalk.artifactFile>
+                <beanstalk.s3Key>apps/${project.artifactId}/${project.build.finalName}-${beanstalk.versionLabel}.zip
+                </beanstalk.s3Key>
+                <beanstalk.artifactFile>${project.build.directory}/${project.build.finalName}.jar
+                </beanstalk.artifactFile>
             </properties>
             <build>
                 <defaultGoal>deploy</defaultGoal>
@@ -197,7 +143,8 @@
                         </executions>
                         <configuration>
                             <s3Url>s3://${beanstalk.s3Bucket}/${beanstalk.s3Key}</s3Url>
-                            <definitionFile>${project.build.outputDirectory}/META-INF/lambada/lambada-functions.json</definitionFile>
+                            <definitionFile>${project.build.outputDirectory}/META-INF/lambada/lambada-functions.json
+                            </definitionFile>
                         </configuration>
                     </plugin>
                 </plugins>

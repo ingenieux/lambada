@@ -10,5 +10,5 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>lambada-core</artifactId>
+    <artifactId>lambada-runtime</artifactId>
 </project>

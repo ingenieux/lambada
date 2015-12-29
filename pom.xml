@@ -8,9 +8,8 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>lambada-model</module>
-        <module>lambada-core</module>
-        <module>lambada-generator</module>
+        <module>lambada-runtime</module>
+        <module>lambada-maven-plugin</module>
         <module>lambada-example</module>
     </modules>
 
@@ -62,7 +61,7 @@
                 <groupId>org.reflections</groupId>
                 <artifactId>reflections</artifactId>
                 <!-- use latest version of Reflections -->
-                <version>0.9.8</version>
+                <version>0.9.10</version>
             </dependency>
 
             <dependency>

@@ -1,7 +1,7 @@
 package br.com.ingenieux.lambada.example;
 
 import com.amazonaws.services.lambda.runtime.Context;
-import io.ingenieux.lambada.ann.LambadaFunction;
+import io.ingenieux.lambada.maven.ann.LambadaFunction;
 
 public class Example {
     @LambadaFunction(timeout=15)
