@@ -1,7 +1,5 @@
 package io.ingenieux.lambada.maven;
 
-import org.apache.commons.lang3.builder.CompareToBuilder;
-
 import java.io.Serializable;
 
 public class LambadaFunctionDefinition implements Serializable, Comparable<LambadaFunctionDefinition> {
@@ -17,13 +15,7 @@ public class LambadaFunctionDefinition implements Serializable, Comparable<Lamba
 
     String handler;
 
-    public LambadaFunctionDefinition(String name, String description, int memorySize, String role, int timeout, String handler) {
-        this.name = name;
-        this.description = description;
-        this.memorySize = memorySize;
-        this.role = role;
-        this.timeout = timeout;
-        this.handler = handler;
+    public LambadaFunctionDefinition() {
     }
 
     public String getName() {
@@ -110,6 +102,6 @@ public class LambadaFunctionDefinition implements Serializable, Comparable<Lamba
         if (this == o)
             return 0;
 
-        return new CompareToBuilder().append(this.name, o.name).toComparison();
+        return this.name.compareTo(o.name);
     }
 }
