@@ -5,16 +5,35 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Tag Annotation for Lambada (Lambda) Functions
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface LambadaFunction {
-    String name() default "";
 
-    String description() default "";
+  /**
+   * Function name. Defaults to method name
+   */
+  String name() default "";
 
-    int memorySize() default 0;
+  /**
+   * Function description.
+   */
+  String description() default "";
 
-    String role() default "";
+  /**
+   * Memory Size, in MB
+   */
+  int memorySize() default 0;
 
-    int timeout() default 0;
+  /**
+   * AWS Role
+   */
+  String role() default "";
+
+  /**
+   * Timeout
+   */
+  int timeout() default 0;
 }
