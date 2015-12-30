@@ -42,8 +42,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.codehaus.plexus.util.StringUtils.isNotBlank;
 
 @Mojo(name = "generate",
         requiresProject = true,
@@ -121,6 +120,10 @@ public class LambadaGenerateMojo
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_DEFAULT);
 
         objectMapper.writeValue(new FileOutputStream(outputFile), defList);
+    }
+
+    private String defaultIfBlank(String one, String another) {
+        return (null != one && (!one.trim().equals(""))) ? one : another;
     }
 
     public void setClasspathUrls(ConfigurationBuilder configurationBuilder) {
