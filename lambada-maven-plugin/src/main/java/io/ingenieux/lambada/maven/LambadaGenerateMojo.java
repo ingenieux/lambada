@@ -46,9 +46,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 @Mojo(name = "generate",
         requiresProject = true,
         defaultPhase = LifecyclePhase.PROCESS_CLASSES,
