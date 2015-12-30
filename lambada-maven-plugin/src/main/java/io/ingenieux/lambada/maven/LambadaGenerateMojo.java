@@ -20,7 +20,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import io.ingenieux.lambada.maven.ann.LambadaFunction;
-import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
@@ -30,12 +29,9 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;
-import org.reflections.serializers.XmlSerializer;
-import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -46,8 +42,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.codehaus.plexus.util.StringUtils.isNotBlank;
 
 @Mojo(name = "generate",
         requiresProject = true,
@@ -125,6 +120,10 @@ public class LambadaGenerateMojo
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_DEFAULT);
 
         objectMapper.writeValue(new FileOutputStream(outputFile), defList);
+    }
+
+    private String defaultIfBlank(String one, String another) {
+        return (null != one && (!one.trim().equals(""))) ? one : another;
     }
 
     public void setClasspathUrls(ConfigurationBuilder configurationBuilder) {
