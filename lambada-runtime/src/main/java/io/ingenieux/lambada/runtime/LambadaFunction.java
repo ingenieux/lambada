@@ -1,4 +1,4 @@
-package io.ingenieux.lambada.maven.ann;
+package io.ingenieux.lambada.runtime;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

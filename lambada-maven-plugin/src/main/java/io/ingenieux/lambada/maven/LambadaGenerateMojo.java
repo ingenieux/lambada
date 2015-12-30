@@ -19,7 +19,7 @@ package io.ingenieux.lambada.maven;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import io.ingenieux.lambada.maven.ann.LambadaFunction;
+import io.ingenieux.lambada.runtime.LambadaFunction;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
