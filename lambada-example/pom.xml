@@ -2,26 +2,15 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>io.ingenieux.lambada</groupId>
-        <artifactId>lambada</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
-    </parent>
-
+    <groupId>br.com.ingenieux.lambada</groupId>
     <artifactId>lambada-example</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
 
     <properties>
-        <lambada.package>br.com.ingenieux.lambada.example</lambada.package>
+        <lambada.version>0.0.1-SNAPSHOT</lambada.version>
     </properties>
 
     <build>
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>true</filtering>
-            </resource>
-        </resources>
         <finalName>${project.artifactId}</finalName>
         <plugins>
             <plugin>
@@ -36,10 +25,15 @@
             <plugin>
                 <groupId>io.ingenieux.lambada</groupId>
                 <artifactId>lambada-maven-plugin</artifactId>
-                <version>${project.version}</version>
-                <goals>
-                    <goal>generate</goal>
-                </goals>
+                <version>${lambada.version}</version>
+                <executions>
+                    <execution>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
@@ -49,20 +43,12 @@
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-lambda-java-core</artifactId>
             <version>1.1.0</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.11</version>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>io.ingenieux.lambada</groupId>
             <artifactId>lambada-runtime</artifactId>
-            <version>${project.version}</version>
+            <version>${lambada.version}</version>
         </dependency>
     </dependencies>
 
@@ -114,7 +100,7 @@
                     <plugin>
                         <groupId>br.com.ingenieux</groupId>
                         <artifactId>beanstalk-maven-plugin</artifactId>
-                        <version>1.4.2-SNAPSHOT</version>
+                        <version>1.4.2</version>
                         <executions>
                             <execution>
                                 <id>deploy</id>
@@ -131,7 +117,7 @@
                     <plugin>
                         <groupId>br.com.ingenieux</groupId>
                         <artifactId>lambda-maven-plugin</artifactId>
-                        <version>1.4.2-SNAPSHOT</version>
+                        <version>1.4.2</version>
                         <executions>
                             <execution>
                                 <id>deploy</id>
