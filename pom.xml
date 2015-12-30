@@ -62,9 +62,9 @@
 
 
     <scm>
-        <connection>scm:git:https://github.com/ingenieux/lambada.git</connection>
-        <developerConnection>scm:git:git://github.com/ingenieux/lambada.git</developerConnection>
-        <url>http://github.com/ingenieux/lambada</url>
+        <connection>scm:git:git@github.com:ingenieux/lambada.git</connection>
+        <developerConnection>scm:git:git@github.com:ingenieux/lambada.git</developerConnection>
+        <url>scm:git:git@github.com:ingenieux/lambada.git</url>
     </scm>
 
     <modules>
