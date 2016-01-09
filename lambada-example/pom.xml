@@ -2,13 +2,15 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>br.com.ingenieux.lambada</groupId>
-    <artifactId>lambada-example</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <parent>
+        <artifactId>lambada</artifactId>
+        <groupId>io.ingenieux.lambada</groupId>
+        <version>0.0.2-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
 
-    <properties>
-        <lambada.version>0.0.1-SNAPSHOT</lambada.version>
-    </properties>
+    <groupId>br.com.ingenieux.lambada.example</groupId>
+    <artifactId>lambada-example</artifactId>
 
     <build>
         <finalName>${project.artifactId}</finalName>
@@ -25,7 +27,6 @@
             <plugin>
                 <groupId>io.ingenieux.lambada</groupId>
                 <artifactId>lambada-maven-plugin</artifactId>
-                <version>${lambada.version}</version>
                 <executions>
                     <execution>
                         <phase>process-classes</phase>
@@ -48,7 +49,16 @@
         <dependency>
             <groupId>io.ingenieux.lambada</groupId>
             <artifactId>lambada-runtime</artifactId>
-            <version>${lambada.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
         </dependency>
     </dependencies>
 

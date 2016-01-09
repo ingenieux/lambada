@@ -49,39 +49,18 @@ import static org.codehaus.plexus.util.StringUtils.isNotBlank;
         defaultPhase = LifecyclePhase.PROCESS_CLASSES,
         requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
 public class LambadaGenerateMojo
-        extends AbstractMojo {
+        extends AbstractLambadaMetadataMojo {
     /**
      * Location of the file.
      */
     @Parameter(defaultValue = "${project.build.outputDirectory}/META-INF/lambada/lambada-functions.json", property = "lambada.outputFile", required = true)
     private File outputFile;
-    /**
-     * Maven Project
-     */
-    @Parameter(defaultValue = "${project}")
-    private MavenProject project;
 
-    public void execute()
-            throws MojoExecutionException {
-        try {
-            executeInternal();
-        } catch (Exception exc) {
-            throw new MojoExecutionException("Failure", exc);
-        }
-    }
-
-    private void executeInternal() throws Exception {
+    @Override
+    protected void executeInternal() throws Exception {
         outputFile.getParentFile().mkdirs();
 
-        ConfigurationBuilder cfg = new ConfigurationBuilder();
-
-        cfg.setScanners(new MethodAnnotationsScanner());
-
-        setClasspathUrls(cfg);
-
-        final Reflections ref = new Reflections(cfg);
-
-        final Set<Method> methodsAnnotatedWith = ref.getMethodsAnnotatedWith(LambadaFunction.class);
+        final Set<Method> methodsAnnotatedWith = extractRuntimeAnnotations(LambadaFunction.class);
 
         final TreeSet<LambadaFunctionDefinition> definitionTreeSet = methodsAnnotatedWith.stream().map(m -> {
             LambadaFunction lF = m.getAnnotation(LambadaFunction.class);
@@ -113,38 +92,7 @@ public class LambadaGenerateMojo
 
         final List<LambadaFunctionDefinition> defList = new ArrayList<>(definitionTreeSet);
 
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_DEFAULT);
-
-        objectMapper.writeValue(new FileOutputStream(outputFile), defList);
+        OBJECT_MAPPER.writeValue(new FileOutputStream(outputFile), defList);
     }
 
-    private String defaultIfBlank(String one, String another) {
-        return (null != one && (!one.trim().equals(""))) ? one : another;
-    }
-
-    public void setClasspathUrls(ConfigurationBuilder configurationBuilder) {
-        List<String> classpathElements = null;
-        try {
-            classpathElements = project.getCompileClasspathElements();
-            List<URL> projectClasspathList = new ArrayList<URL>();
-
-            for (String element : classpathElements) {
-                projectClasspathList.add(new File(element).toURI().toURL());
-            }
-
-            //for (Artifact a : project.getArtifacts()) {
-            //    projectClasspathList.add(a.getFile().toURI().toURL());
-            //}
-
-            configurationBuilder.addUrls(projectClasspathList);
-
-            configurationBuilder.addClassLoader(new URLClassLoader(projectClasspathList.toArray(new URL[0]), Thread.currentThread().getContextClassLoader()));
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
-        }
-    }
 }
