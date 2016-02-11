@@ -14,14 +14,22 @@
  * limitations under the License.
  */
 
-package br.com.ingenieux.lambada.example;
+package io.ingenieux.lambada.invoker.fixtures;
 
-import com.amazonaws.services.lambda.runtime.Context;
-import io.ingenieux.lambada.runtime.LambadaFunction;
+import com.amazonaws.services.lambda.runtime.LambdaLogger;
 
-public class Example {
-    @LambadaFunction(timeout=15)
-    public String sayHello(String whom, Context ctx) {
-        return String.format("Hello, %s!", whom);
-    }
+import java.util.ArrayList;
+import java.util.List;
+
+public class LoggerFixture implements LambdaLogger {
+  List<String> messageList = new ArrayList<>();
+
+  @Override
+  public void log(String message) {
+    this.messageList.add(message);
+  }
+
+  public List<String> getMessageList() {
+    return messageList;
+  }
 }

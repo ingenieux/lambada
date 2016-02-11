@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-package br.com.ingenieux.lambada.example;
+package io.ingenieux.lambada.invoker;
 
-import com.amazonaws.services.lambda.runtime.Context;
-import io.ingenieux.lambada.runtime.LambadaFunction;
-
-public class Example {
-    @LambadaFunction(timeout=15)
-    public String sayHello(String whom, Context ctx) {
-        return String.format("Hello, %s!", whom);
+/**
+ * Hello world!
+ *
+ */
+public class App 
+{
+    public static void main( String[] args )
+    {
+        System.out.println( "Hello World!" );
     }
 }

@@ -14,14 +14,31 @@
  * limitations under the License.
  */
 
-package br.com.ingenieux.lambada.example;
+package io.ingenieux.lambada.runtime;
 
-import com.amazonaws.services.lambda.runtime.Context;
-import io.ingenieux.lambada.runtime.LambadaFunction;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public class Example {
-    @LambadaFunction(timeout=15)
-    public String sayHello(String whom, Context ctx) {
-        return String.format("Hello, %s!", whom);
-    }
+/**
+ * Tag Annotation for API Gateway (Lambda) Functions
+ */
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface ApiGateway {
+  public enum MethodType {
+    GET,
+    POST
+  }
+
+  /**
+   * Function name. Defaults to method name
+   */
+  String path() default "";
+
+  /**
+   * Method Type
+   */
+  MethodType method() default MethodType.POST;
 }

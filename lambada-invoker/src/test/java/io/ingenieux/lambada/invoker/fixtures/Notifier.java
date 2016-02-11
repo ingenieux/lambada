@@ -14,14 +14,29 @@
  * limitations under the License.
  */
 
-package br.com.ingenieux.lambada.example;
+package io.ingenieux.lambada.invoker.fixtures;
 
-import com.amazonaws.services.lambda.runtime.Context;
-import io.ingenieux.lambada.runtime.LambadaFunction;
+import java.util.ArrayList;
+import java.util.List;
 
-public class Example {
-    @LambadaFunction(timeout=15)
-    public String sayHello(String whom, Context ctx) {
-        return String.format("Hello, %s!", whom);
+public class Notifier {
+
+    private static ThreadLocal<List<String>> messageList = new ThreadLocal<List<String>>() {
+        @Override
+        protected List<String> initialValue() {
+            return new ArrayList<>();
+        }
+    };
+
+    public static void addMessage(String m) {
+        messageList.get().add(m);
+    }
+
+    public static void clear() {
+        messageList.get().clear();
+    }
+
+    public static List<String> getMessages() {
+        return messageList.get();
     }
 }
