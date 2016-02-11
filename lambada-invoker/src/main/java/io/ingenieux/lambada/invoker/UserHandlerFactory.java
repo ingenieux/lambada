@@ -14,22 +14,6 @@
  * limitations under the License.
  */
 
-/*
- * Copyright (c) 2016 ingenieux Labs
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package io.ingenieux.lambada.invoker;
 
 import com.amazonaws.services.lambda.runtime.Context;
@@ -55,7 +39,9 @@ public abstract class UserHandlerFactory {
             m.invoke(o);
           }
         };
-      } else if (hasReturnType(m, Void.TYPE) && hasParameterTypes(m, Context.class)) {
+      }
+
+      if (hasReturnType(m, Void.TYPE) && hasParameterTypes(m, Context.class)) {
         return new UserHandler(o, m) {
           public void invoke(InputStream is, OutputStream os, Context c) throws Exception {
             m.invoke(o, c);
@@ -70,6 +56,42 @@ public abstract class UserHandlerFactory {
   public static class RawUserHandlerFactory extends UserHandlerFactory {
 
     public UserHandler getUserHandler(Object o, Method m) {
+      if (1 == m.getParameterCount() && hasReturnType(m, Void.TYPE) && hasParameterTypes(m, InputStream.class)) {
+        return new UserHandler(o, m) {
+          @Override
+          public void invoke(InputStream is, OutputStream os, Context c) throws Exception {
+            m.invoke(o, is);
+          }
+        };
+      }
+
+      if (2 == m.getParameterCount() && hasReturnType(m, Void.TYPE) && hasParameterTypes(m, InputStream.class, Context.class)) {
+        return new UserHandler(o, m) {
+          @Override
+          public void invoke(InputStream is, OutputStream os, Context c) throws Exception {
+            m.invoke(o, is, c);
+          }
+        };
+      }
+
+      if (1 == m.getParameterCount() && hasReturnType(m, Void.TYPE) && hasParameterTypes(m, OutputStream.class)) {
+        return new UserHandler(o, m) {
+          @Override
+          public void invoke(InputStream is, OutputStream os, Context c) throws Exception {
+            m.invoke(o, os);
+          }
+        };
+      }
+
+      if (2 == m.getParameterCount() && hasReturnType(m, Void.TYPE) && hasParameterTypes(m, OutputStream.class, Context.class)) {
+        return new UserHandler(o, m) {
+          @Override
+          public void invoke(InputStream is, OutputStream os, Context c) throws Exception {
+            m.invoke(o, os, c);
+          }
+        };
+      }
+
       if (2 == m.getParameterCount() &&
           hasReturnType(m, Void.TYPE) &&
           hasParameterTypes(m, InputStream.class, OutputStream.class)) {
@@ -79,7 +101,9 @@ public abstract class UserHandlerFactory {
             m.invoke(o, is, os);
           }
         };
-      } else if (3 == m.getParameterCount() &&
+      }
+
+      if (3 == m.getParameterCount() &&
                  hasReturnType(m, Void.TYPE) &&
                  hasParameterTypes(m, InputStream.class, OutputStream.class, Context.class)) {
         return new UserHandler(o, m) {
@@ -108,7 +132,9 @@ public abstract class UserHandlerFactory {
             m.invoke(o, inputArgument);
           }
         };
-      } else if (1 == m.getParameterCount() && hasJacksonAbleParameters(m, m.getParameterTypes()[0],
+      }
+
+      if (1 == m.getParameterCount() && hasJacksonAbleParameters(m, m.getParameterTypes()[0],
                                                                  m.getReturnType())) {
         return new UserHandler(o, m) {
           @Override
@@ -120,7 +146,9 @@ public abstract class UserHandlerFactory {
             OBJECT_MAPPER.writeValue(os, result);
           }
         };
-      } else if (2 == m.getParameterCount() &&
+      }
+
+      if (2 == m.getParameterCount() &&
                  m.getParameterTypes()[1] == Context.class &&
                  hasJacksonAbleParameters(m, m.getParameterTypes()[0], m.getReturnType())) {
         return new UserHandler(o, m) {

@@ -18,17 +18,20 @@ package br.com.ingenieux.lambada.example;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.ingenieux.lambada.runtime.ApiGateway;
-import io.ingenieux.lambada.runtime.LambadaFunction;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import org.apache.commons.io.IOUtils;
 
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import io.ingenieux.lambada.runtime.ApiGateway;
+import io.ingenieux.lambada.runtime.LambadaFunction;
+
 public class ExampleApiGateway1 {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-    @LambadaFunction(timeout=15)
+    @LambadaFunction(timeout=300)
     @ApiGateway(path="/sayhello/1")
     public void sayHelloLowLevel(InputStream is, OutputStream os, Context ctx) throws Exception {
         String whom = OBJECT_MAPPER.readValue(is, String.class);
@@ -36,15 +39,21 @@ public class ExampleApiGateway1 {
         IOUtils.write(String.format("Hello, %s!", whom), os);
     }
 
-    @LambadaFunction(timeout=15)
+    @LambadaFunction(timeout=300)
     @ApiGateway(path="/sayhello/2")
     public void sayHelloLowLevel2(OutputStream os, Context ctx) throws Exception {
         IOUtils.write("Hello, World!", os);
     }
 
-    @LambadaFunction(timeout=15)
+    @LambadaFunction(timeout=300)
     @ApiGateway(path="/sayhello/3")
     public void sayHelloLowLevel3(Context ctx) throws Exception {
         System.err.println("Hello, World!");
+    }
+
+    @LambadaFunction(timeout=300)
+    @ApiGateway(path="/sayhello/4")
+    public void sayHello4(ObjectNode objectNode) throws Exception {
+        System.err.println("objectNode: " + objectNode);
     }
 }

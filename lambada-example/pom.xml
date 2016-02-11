@@ -28,6 +28,11 @@
     <groupId>br.com.ingenieux.lambada.example</groupId>
     <artifactId>lambada-example</artifactId>
 
+    <properties>
+        <maven.install.skip>true</maven.install.skip>
+        <maven.deploy.skip>true</maven.deploy.skip>
+    </properties>
+
     <build>
         <finalName>${project.artifactId}</finalName>
         <plugins>

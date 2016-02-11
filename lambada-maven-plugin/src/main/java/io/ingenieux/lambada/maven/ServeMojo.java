@@ -16,228 +16,258 @@
 
 package io.ingenieux.lambada.maven;
 
-import com.amazonaws.services.lambda.runtime.Context;
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
-import com.sun.net.httpserver.HttpServer;
-import io.ingenieux.lambada.runtime.ApiGateway;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.net.InetSocketAddress;
 import java.util.Set;
 import java.util.TreeSet;
 
+import io.ingenieux.lambada.invoker.Invoker;
+import io.ingenieux.lambada.invoker.UserHandlerFactory;
+import io.ingenieux.lambada.runtime.ApiGateway;
+import io.ingenieux.lambada.testing.LambadaContext;
+import spark.Request;
+import spark.Response;
+
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static spark.Spark.awaitInitialization;
+import static spark.Spark.get;
+import static spark.Spark.port;
+import static spark.Spark.post;
+import static spark.Spark.stop;
+import static spark.Spark.threadPool;
+
 @Mojo(name = "serve", requiresDirectInvocation = true, requiresProject = true,
-        defaultPhase = LifecyclePhase.PROCESS_CLASSES,
-        requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
+    defaultPhase = LifecyclePhase.PROCESS_CLASSES,
+    requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
 public class ServeMojo extends AbstractLambadaMetadataMojo {
-    /**
-     * Port to Use
-     */
-    @Parameter(property = "lambada.port", defaultValue = "8080")
-    Integer port;
 
-    private final Set<PathHandler> handlers = new TreeSet<>();
+  /**
+   * Port to Use
+   */
+  @Parameter(property = "lambada.port", defaultValue = "8080")
+  Integer serverPort;
+  private final Set<PathHandler> pathHandlers = new TreeSet<PathHandler>();
 
-    static class PathHandler implements Comparable<PathHandler> {
-        String path;
+//
+//    public class ServeHandler implements HttpHandler {
+//        PathHandler p;
+//
+//        public ServeHandler(PathHandler p) {
+//            this.p = p;
+//        }
+//
+//        @Override
+//        public void handle(HttpExchange ex) throws IOException {
+//            if (!p.matchesRequest(ex)) {
+//                ex.sendResponseHeaders(404, 0L);
+//                ex.close();
+//
+//                return;
+//            }
+//
+//            try {
+//                byte[] output = invokePath(p, ex, ex.getRequestBody());
+//
+//                ex.sendResponseHeaders(200, output.length);
+//                //ex.getRequestHeaders().set("Content-Type", "application/json; charset=utf8");
+//                ex.getResponseBody().write(output);
+//                ex.close();
+//            } catch (Exception e) {
+//                byte[] eAsByteArray = e.toString().getBytes();
+//
+//                ex.sendResponseHeaders(500, eAsByteArray.length);
+//                ex.getRequestHeaders().set("Content-Type", "text/plain");
+//                ex.getResponseBody().write(eAsByteArray);
+//                ex.close();
+//            }
+//        }
+//    }
+//
 
-        public String getPath() {
-            return path;
+  @Override
+  protected void executeInternal() throws Exception {
+    loadPathHandlers();
+
+    port(serverPort);
+
+    threadPool(8);
+
+    setupServer();
+
+    awaitInitialization();
+
+    while (10 != System.in.read()) {
+      Thread.sleep(500);
+    }
+
+    stop();
+  }
+
+  private void setupServer() {
+    for (PathHandler p : pathHandlers) {
+      if (p.getMethodType() == ApiGateway.MethodType.GET) {
+        get(p.getPath(), p::handle);
+      } else if (p.getMethodType() == ApiGateway.MethodType.POST) {
+        post(p.getPath(), p::handle);
+      }
+    }
+  }
+
+  public void loadPathHandlers() throws Exception {
+    final Set<Method> methodsAnnotatedWith = extractRuntimeAnnotations(ApiGateway.class);
+
+    getLog().info("There are " + methodsAnnotatedWith.size() + " found methods.");
+
+    for (Method m : methodsAnnotatedWith) {
+      ApiGateway a = m.getAnnotation(ApiGateway.class);
+      PathHandler pathHandler = new PathHandler();
+
+      pathHandler.setPath(a.path());
+      pathHandler.setMethod(m);
+
+      boolean bStatic = Modifier.isStatic(m.getModifiers());
+
+      // TODO: ApiGateway
+      getLog().info("Class: " + m.getDeclaringClass().getName());
+
+      if (!bStatic) {
+        try {
+          pathHandler.setInstance(m.getDeclaringClass().newInstance());
+        } catch (Exception exc) {
+          throw new RuntimeException("Unable to create class " + m.getDeclaringClass(), exc);
         }
+      }
 
-        public void setPath(String path) {
-            this.path = path;
-        }
+      pathHandler.setMethodType(a.method());
 
-        ApiGateway.MethodType methodType;
+      getLog().info("Added path handler: " + pathHandler);
 
-        public ApiGateway.MethodType getMethodType() {
-            return methodType;
-        }
+      pathHandlers.add(pathHandler.build());
+    }
 
-        public void setMethodType(ApiGateway.MethodType methodType) {
-            this.methodType = methodType;
-        }
 
-        Object instance;
+  }
 
-        public Object getInstance() {
-            return instance;
-        }
+  class PathHandler implements Comparable<PathHandler> {
 
-        public void setInstance(Object instance) {
-            this.instance = instance;
-        }
+    String path;
 
-        Method method;
+    public String getPath() {
+      return path;
+    }
 
-        public Method getMethod() {
-            return method;
-        }
+    public void setPath(String path) {
+      this.path = path;
+    }
 
-        public void setMethod(Method method) {
-            this.method = method;
-        }
+    ApiGateway.MethodType methodType;
 
-        @Override
-        public int compareTo(PathHandler o) {
-            return path.compareTo(o.path);
-        }
+    public ApiGateway.MethodType getMethodType() {
+      return methodType;
+    }
 
-        public boolean matchesRequest(HttpExchange event) {
-            if (!event.getRequestMethod().equalsIgnoreCase(methodType.name()))
-                return false;
+    public void setMethodType(ApiGateway.MethodType methodType) {
+      this.methodType = methodType;
+    }
 
-            return true;
-        }
+    Object instance;
+
+    public Object getInstance() {
+      return instance;
+    }
+
+    public void setInstance(Object instance) {
+      this.instance = instance;
+    }
+
+    Method method;
+
+    public Method getMethod() {
+      return method;
+    }
+
+    public void setMethod(Method method) {
+      this.method = method;
     }
 
     @Override
-    protected void executeInternal() throws Exception {
-        final Set<Method> methodsAnnotatedWith = extractRuntimeAnnotations(ApiGateway.class);
-
-        for (Method m : methodsAnnotatedWith) {
-            ApiGateway a = m.getAnnotation(ApiGateway.class);
-            PathHandler pathHandler = new PathHandler();
-
-            pathHandler.setPath(a.path());
-            pathHandler.setMethod(m);
-
-            boolean bStatic = Modifier.isStatic(m.getModifiers());
-
-            if (!bStatic) {
-                pathHandler.setInstance(m.getDeclaringClass().newInstance());
-            }
-
-            pathHandler.setMethodType(a.method());
-
-            handlers.add(pathHandler);
-        }
-
-        serve();
-
-
+    public int compareTo(PathHandler o) {
+      return path.compareTo(o.path);
     }
 
-    public void serve() throws Exception {
-        HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
-
-        getLog().info("Using port: " + port);
-
-        for (PathHandler p : handlers) {
-            getLog().info("Adding handler for path " + p.getPath());
-
-            server.createContext(p.getPath(), new ServeHandler(p));
-        }
-
-        server.start();
-
-        while (10 != System.in.read())
-            ;
-
-        server.stop(60000);
+    @Override
+    public String toString() {
+      return "PathHandler{" +
+             "path='" + path + '\'' +
+             ", methodType=" + methodType +
+             ", instance=" + instance +
+             ", method=" + method +
+             '}';
     }
 
-    public class ServeHandler implements HttpHandler {
-        PathHandler p;
+    Invoker invoker = null;
 
-        public ServeHandler(PathHandler p) {
-            this.p = p;
-        }
+    public PathHandler build() {
+      invoker = new Invoker();
 
-        @Override
-        public void handle(HttpExchange ex) throws IOException {
-            if (!p.matchesRequest(ex)) {
-                ex.sendResponseHeaders(404, 0L);
-                ex.close();
+      invoker.setUserHandler(UserHandlerFactory.findUserFactory(this.instance, this.method));
 
-                return;
-            }
+      if (null == invoker.getUserHandler())
+        throw new IllegalArgumentException("Oops: Unable to build an path handler for " + this.toString());
 
-            try {
-                byte[] output = invokePath(p, ex, ex.getRequestBody());
-
-                ex.sendResponseHeaders(200, output.length);
-                //ex.getRequestHeaders().set("Content-Type", "application/json; charset=utf8");
-                ex.getResponseBody().write(output);
-                ex.close();
-            } catch (Exception e) {
-                byte[] eAsByteArray = e.toString().getBytes();
-
-                ex.sendResponseHeaders(500, eAsByteArray.length);
-                ex.getRequestHeaders().set("Content-Type", "text/plain");
-                ex.getResponseBody().write(eAsByteArray);
-                ex.close();
-            }
-        }
+      return this;
     }
 
-    static class ArgumentBuilder {
-        int index = 0;
+    public Object handle(Request request, Response response) throws Exception {
+      InputStream is = IOUtils.toInputStream(defaultString(request.body(), "null"));
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-        Method method;
+      try {
+        invoker.invoke(is, baos, LambadaContext.Builder.lambadaContext().build());
 
-        Object[] args;
+        response.status(200);
+        response.type("application/json");
 
-        Class<?>[] types;
+        if (0 == baos.size()) {
+          return "null";
+        } else {
+          try {
+            JsonNode asJsonNode = OBJECT_MAPPER.readValue(baos.toByteArray(), JsonNode.class);
 
-        public ArgumentBuilder(Method m) {
-            this.method = m;
-            this.args = new Object[m.getParameterCount()];
-            this.types = m.getParameterTypes();
+            return asJsonNode;
+          } catch (Exception e) {
+            response.type("text/plain");
+
+            return new String(baos.toByteArray());
+          }
         }
+      } catch (Exception exc) {
+        response.status(500);
+        response.type("application/json");
 
-        public boolean matchAndLoad(Class<?> src, Object value) {
-            if ((args.length + 1) < index)
-                return false;
+        if (OBJECT_MAPPER.canSerialize(exc.getClass())) {
+          return OBJECT_MAPPER.writeValueAsString(exc);
+        } else {
+          ObjectNode parentNode = OBJECT_MAPPER.createObjectNode();
 
-            if (!types[index].isAssignableFrom(src))
-                return false;
+          parentNode.put("message", exc.getMessage());
+          parentNode.put("class", exc.getClass().getName());
 
-            args[index] = value;
-
-            index++;
-
-            return true;
+          return parentNode;
         }
-
-        public Object[] getArgs() {
-            return args;
-        }
+      }
     }
+  }
 
-    byte[] invokePath(PathHandler handler, HttpExchange event, InputStream payload) throws Exception {
-        /**
-         * Situation #1:
-         *
-         * InputStream, OutputStream, Context
-         */
-        {
-            ArgumentBuilder a = new ArgumentBuilder(handler.getMethod());
-
-            InputStream is = payload;
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            Context fakeContext = new FakeContext();
-
-            a.matchAndLoad(InputStream.class, is);
-            a.matchAndLoad(OutputStream.class, baos);
-            a.matchAndLoad(Context.class, fakeContext);
-
-
-            handler.method.invoke(handler.instance, a.getArgs());
-
-            return baos.toByteArray();
-        }
-
-    }
 }

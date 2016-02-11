@@ -14,22 +14,6 @@
  * limitations under the License.
  */
 
-/*
- * Copyright (c) 2016 ingenieux Labs
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package io.ingenieux.lambada.testing;
 
 import com.amazonaws.services.lambda.runtime.ClientContext;
@@ -39,29 +23,29 @@ import com.amazonaws.services.lambda.runtime.LambdaLogger;
 
 public class LambadaContext implements Context {
 
-  final String awsRequestId;
+  protected String awsRequestId;
 
-  final String logGroupName;
+  protected String logGroupName;
 
-  final String logStreamName;
+  protected String logStreamName;
 
-  final String functionName;
+  protected String functionName;
 
-  final String functionVersion;
+  protected String functionVersion;
 
-  final String invokedFunctionArn;
+  protected String invokedFunctionArn;
 
-  final CognitoIdentity identity;
+  protected CognitoIdentity identity;
 
-  final int remainingTimeInMillis;
+  protected int remainingTimeInMillis;
 
-  final int memoryLimitInMB;
+  protected int memoryLimitInMB;
 
-  final LambdaLogger logger;
+  protected LambdaLogger logger;
 
-  final ClientContext clientContext;
+  protected ClientContext clientContext;
 
-  private LambadaContext(String awsRequestId, String logGroupName, String logStreamName,
+  protected LambadaContext(String awsRequestId, String logGroupName, String logStreamName,
                          String functionName, String functionVersion,
                          String invokedFunctionArn,
                          CognitoIdentity identity, int remainingTimeInMillis, int memoryLimitInMB,
