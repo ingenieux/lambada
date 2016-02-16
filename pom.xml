@@ -63,6 +63,13 @@
         <url>http://ingenieux.com.br</url>
     </organization>
 
+    <mailingLists>
+        <mailingList>
+            <name>lambada-users</name>
+            <archive>http://groups.google.com/group/lambada-users</archive>
+        </mailingList>
+    </mailingLists>
+
     <developers>
         <developer>
             <id>aldrinleal</id>
