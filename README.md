@@ -1,5 +1,7 @@
 # Lambada
 
+[![Join the chat at https://gitter.im/ingenieux/lambada](https://badges.gitter.im/ingenieux/lambada.svg)](https://gitter.im/ingenieux/lambada?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 ## AWS Lambda for Silly People
 
 ## Installation
