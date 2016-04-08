@@ -17,6 +17,7 @@
 package io.ingenieux.lambada.runtime;
 
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -25,11 +26,15 @@ import java.lang.annotation.Target;
  * Tag Annotation for API Gateway (Lambda) Functions
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
 public @interface ApiGateway {
   public enum MethodType {
     GET,
-    POST
+    POST,
+    DELETE,
+    HEAD,
+    OPTIONS,
+    PATCH,
+    PUT
   }
 
   /**
@@ -41,4 +46,9 @@ public @interface ApiGateway {
    * Method Type
    */
   MethodType method() default MethodType.POST;
+
+  /**
+   * Template to use (default: default)
+   */
+  String template() default "default";
 }

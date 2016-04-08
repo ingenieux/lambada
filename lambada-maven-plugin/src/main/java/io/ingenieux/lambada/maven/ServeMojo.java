@@ -35,6 +35,7 @@ import java.util.TreeSet;
 import io.ingenieux.lambada.invoker.Invoker;
 import io.ingenieux.lambada.invoker.UserHandlerFactory;
 import io.ingenieux.lambada.runtime.ApiGateway;
+import io.ingenieux.lambada.runtime.LambadaFunction;
 import io.ingenieux.lambada.testing.LambadaContext;
 import spark.Request;
 import spark.Response;
@@ -58,42 +59,6 @@ public class ServeMojo extends AbstractLambadaMetadataMojo {
   @Parameter(property = "lambada.port", defaultValue = "8080")
   Integer serverPort;
   private final Set<PathHandler> pathHandlers = new TreeSet<PathHandler>();
-
-//
-//    public class ServeHandler implements HttpHandler {
-//        PathHandler p;
-//
-//        public ServeHandler(PathHandler p) {
-//            this.p = p;
-//        }
-//
-//        @Override
-//        public void handle(HttpExchange ex) throws IOException {
-//            if (!p.matchesRequest(ex)) {
-//                ex.sendResponseHeaders(404, 0L);
-//                ex.close();
-//
-//                return;
-//            }
-//
-//            try {
-//                byte[] output = invokePath(p, ex, ex.getRequestBody());
-//
-//                ex.sendResponseHeaders(200, output.length);
-//                //ex.getRequestHeaders().set("Content-Type", "application/json; charset=utf8");
-//                ex.getResponseBody().write(output);
-//                ex.close();
-//            } catch (Exception e) {
-//                byte[] eAsByteArray = e.toString().getBytes();
-//
-//                ex.sendResponseHeaders(500, eAsByteArray.length);
-//                ex.getRequestHeaders().set("Content-Type", "text/plain");
-//                ex.getResponseBody().write(eAsByteArray);
-//                ex.close();
-//            }
-//        }
-//    }
-//
 
   @Override
   protected void executeInternal() throws Exception {
@@ -125,12 +90,18 @@ public class ServeMojo extends AbstractLambadaMetadataMojo {
   }
 
   public void loadPathHandlers() throws Exception {
-    final Set<Method> methodsAnnotatedWith = extractRuntimeAnnotations(ApiGateway.class);
+    final Set<Method> methodsAnnotatedWith = extractRuntimeAnnotations(LambadaFunction.class);
 
     getLog().info("There are " + methodsAnnotatedWith.size() + " found methods.");
 
     for (Method m : methodsAnnotatedWith) {
-      ApiGateway a = m.getAnnotation(ApiGateway.class);
+      final LambadaFunction annotation = m.getAnnotation(LambadaFunction.class);
+
+      if (null == annotation.api() || 1 != annotation.api().length)
+        return;
+
+      ApiGateway a = annotation.api()[0];
+
       PathHandler pathHandler = new PathHandler();
 
       pathHandler.setPath(a.path());
@@ -269,5 +240,4 @@ public class ServeMojo extends AbstractLambadaMetadataMojo {
       }
     }
   }
-
 }

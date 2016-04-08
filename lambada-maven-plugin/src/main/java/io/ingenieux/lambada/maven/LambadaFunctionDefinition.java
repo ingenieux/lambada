@@ -19,6 +19,16 @@ package io.ingenieux.lambada.maven;
 import java.io.Serializable;
 
 public class LambadaFunctionDefinition implements Serializable, Comparable<LambadaFunctionDefinition> {
+    public enum MethodType {
+        GET,
+        POST,
+        DELETE,
+        HEAD,
+        OPTIONS,
+        PATCH,
+        PUT
+    }
+
     String name;
 
     String description;
@@ -30,6 +40,8 @@ public class LambadaFunctionDefinition implements Serializable, Comparable<Lamba
     int timeout;
 
     String handler;
+
+    APIGatewayDefinition api = null;
 
     public LambadaFunctionDefinition() {
     }
@@ -80,6 +92,14 @@ public class LambadaFunctionDefinition implements Serializable, Comparable<Lamba
 
     public void setHandler(String handler) {
         this.handler = handler;
+    }
+
+    public APIGatewayDefinition getApi() {
+        return api;
+    }
+
+    public void setApi(APIGatewayDefinition api) {
+        this.api = api;
     }
 
     @Override

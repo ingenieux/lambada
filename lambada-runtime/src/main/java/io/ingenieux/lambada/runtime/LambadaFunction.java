@@ -52,4 +52,11 @@ public @interface LambadaFunction {
    * Timeout
    */
   int timeout() default 0;
+
+  /**
+   * AWS API Gateway Endpoint (Optional)
+   *
+   * @return endpoint
+     */
+  ApiGateway[] api() default {};
 }

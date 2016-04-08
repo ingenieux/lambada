@@ -16,7 +16,11 @@
 
 package io.ingenieux.lambada.maven;
 
+import com.google.common.base.Charsets;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationConfig;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import io.ingenieux.lambada.runtime.LambadaFunction;
@@ -33,6 +37,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -41,16 +46,19 @@ import java.util.Set;
  * A Abstract Metadata Extractor for Lambada Mojos
  */
 public abstract class AbstractLambadaMetadataMojo extends AbstractMojo {
+    public static final Charset DEFAULT_CHARSET = Charsets.UTF_8;
+
     /**
      * Maven Project
      */
-    @Parameter(defaultValue = "${project}")
+    @Parameter(defaultValue = "${project}", required = true)
     private MavenProject project;
 
     static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     static {
         OBJECT_MAPPER.enable(SerializationFeature.INDENT_OUTPUT);
+        OBJECT_MAPPER.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         OBJECT_MAPPER.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         OBJECT_MAPPER.setSerializationInclusion(JsonInclude.Include.NON_DEFAULT);
     }
