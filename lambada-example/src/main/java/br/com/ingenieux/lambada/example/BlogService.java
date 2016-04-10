@@ -29,22 +29,6 @@ public class BlogService {
         System.err.println(OBJECT_MAPPER.writeValueAsString(req));
 
         IOUtils.write("{\"ok\"}", outputStream);
-//        String inContent = IOUtils.toString(inputStream);
-//
-//        System.out.println(inContent);
-//
-//        IOUtils.write("{\"ok\"}", outputStream);
-//        /*
-//        ObjectNode requestAsObject = OBJECT_MAPPER.convertValue(request, ObjectNode.class);
-//
-//        System.err.println("createBlog(): " + requestAsObject);
-//
-//        final ObjectNode result = OBJECT_MAPPER.createObjectNode();
-//
-//        result.put("id", "new-blog");
-//
-//        return OBJECT_MAPPER.writeValueAsString(result);
-//        */
     }
 
     @LambadaFunction(timeout=60, api=@ApiGateway(path="/blogs/{blogId}/", method=ApiGateway.MethodType.POST))
