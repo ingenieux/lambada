@@ -129,6 +129,18 @@
                         </executions>
                     </plugin>
                     <plugin>
+                        <groupId>io.github.zlika</groupId>
+                        <artifactId>reproducible-build-maven-plugin</artifactId>
+                        <version>0.2</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>strip-jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
                         <groupId>br.com.ingenieux</groupId>
                         <artifactId>beanstalk-maven-plugin</artifactId>
                         <version>${beanstalker.version}</version>
@@ -179,6 +191,7 @@
                         </executions>
                         <configuration>
                             <restApiName>blog-api</restApiName>
+                            <restApiDescription>Blog API Project</restApiDescription>
                             <stageName>dev</stageName>
                         </configuration>
                     </plugin>

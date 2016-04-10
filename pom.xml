@@ -94,7 +94,6 @@
         <module>lambada-testing</module>
         <module>lambada-invoker</module>
         <module>lambada-maven-plugin</module>
-        <module>lambada-example</module>
     </modules>
 
     <properties>
@@ -285,6 +284,16 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <profiles>
+        <profile>
+            <id>dev</id>
+
+            <modules>
+                <module>lambada-example</module>
+            </modules>
+        </profile>
+    </profiles>
 
     <reporting>
         <plugins>
