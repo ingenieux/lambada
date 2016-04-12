@@ -32,7 +32,6 @@ public @interface ApiGateway {
     POST,
     DELETE,
     HEAD,
-    OPTIONS,
     PATCH,
     PUT
   }
@@ -51,4 +50,9 @@ public @interface ApiGateway {
    * Template to use (default: default)
    */
   String template() default "default";
+
+  /**
+   * True if CORS-enabled
+   */
+  boolean corsEnabled() default true;
 }

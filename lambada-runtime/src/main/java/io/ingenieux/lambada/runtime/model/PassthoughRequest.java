@@ -23,7 +23,9 @@ public class PassthoughRequest<T> {
     }
 
     public static <T> PassthoughRequest<T> getRequest(ObjectMapper mapper, Class<T> clazz, InputStream inputStream) throws IOException {
-        final TypeReference<PassthoughRequest<T>> typeReference = new TypeReference<PassthoughRequest<T>>() {};
+        final JavaType typeReference = mapper.
+                getTypeFactory()
+                .constructParametrizedType(PassthoughRequest.class, PassthoughRequest.class, clazz);
 
         return mapper.readValue(inputStream, typeReference);
     }

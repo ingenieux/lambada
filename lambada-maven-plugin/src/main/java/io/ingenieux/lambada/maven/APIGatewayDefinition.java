@@ -1,14 +1,13 @@
 package io.ingenieux.lambada.maven;
 
-/**
- * Created by aldrin on 08/04/16.
- */
 public class APIGatewayDefinition {
     String path;
 
     LambadaFunctionDefinition.MethodType methodType;
 
     String template;
+
+    boolean isCorsEnabled;
 
     public String getPath() {
         return path;
@@ -32,5 +31,13 @@ public class APIGatewayDefinition {
 
     public void setTemplate(String template) {
         this.template = template;
+    }
+
+    public boolean isCorsEnabled() {
+        return isCorsEnabled;
+    }
+
+    public void setCorsEnabled(boolean corsEnabled) {
+        isCorsEnabled = corsEnabled;
     }
 }
