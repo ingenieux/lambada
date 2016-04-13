@@ -3,7 +3,7 @@ package io.ingenieux.lambada.maven;
 public class APIGatewayDefinition {
     String path;
 
-    LambadaFunctionDefinition.MethodType methodType;
+    MethodType methodType;
 
     String template;
 
@@ -17,11 +17,11 @@ public class APIGatewayDefinition {
         this.path = path;
     }
 
-    public LambadaFunctionDefinition.MethodType getMethodType() {
+    public MethodType getMethodType() {
         return methodType;
     }
 
-    public void setMethodType(LambadaFunctionDefinition.MethodType methodType) {
+    public void setMethodType(MethodType methodType) {
         this.methodType = methodType;
     }
 
@@ -39,5 +39,14 @@ public class APIGatewayDefinition {
 
     public void setCorsEnabled(boolean corsEnabled) {
         isCorsEnabled = corsEnabled;
+    }
+
+    public enum MethodType {
+      GET,
+      POST,
+      DELETE,
+      HEAD,
+      PATCH,
+      PUT
     }
 }

@@ -27,11 +27,15 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface LambadaFunction {
-
   /**
    * Function name. Defaults to method name
    */
   String name() default "";
+
+  /**
+   * Function alias. Optional.
+   */
+  String alias() default "";
 
   /**
    * Function description.

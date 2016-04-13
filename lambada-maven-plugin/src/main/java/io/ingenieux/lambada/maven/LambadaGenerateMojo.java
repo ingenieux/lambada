@@ -264,6 +264,8 @@ public class LambadaGenerateMojo
 
         final String handler = m.getDeclaringClass().getCanonicalName() + "::" + m.getName();
 
+        result.setAlias(lF.alias());
+
         result.setHandler(handler);
 
         result.setMemorySize(lF.memorySize()); // #2
@@ -283,7 +285,7 @@ public class LambadaGenerateMojo
 
             APIGatewayDefinition def = new APIGatewayDefinition();
 
-            def.setMethodType(LambadaFunctionDefinition.MethodType.valueOf(apiGatewayAnn.method().name()));
+            def.setMethodType(APIGatewayDefinition.MethodType.valueOf(apiGatewayAnn.method().name()));
             def.setPath(apiGatewayAnn.path());
             def.setTemplate(apiGatewayAnn.template());
             def.setCorsEnabled(apiGatewayAnn.corsEnabled());
