@@ -36,7 +36,7 @@ import io.ingenieux.lambada.invoker.Invoker;
 import io.ingenieux.lambada.invoker.UserHandlerFactory;
 import io.ingenieux.lambada.runtime.ApiGateway;
 import io.ingenieux.lambada.runtime.LambadaFunction;
-import io.ingenieux.lambada.testing.LambadaContext;
+import io.ingenieux.lambada.testing.ImmutableLambadaContext;
 import spark.Request;
 import spark.Response;
 
@@ -205,7 +205,7 @@ public class ServeMojo extends AbstractLambadaMetadataMojo {
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
       try {
-        invoker.invoke(is, baos, LambadaContext.Builder.lambadaContext().build());
+        invoker.invoke(is, baos, ImmutableLambadaContext.builder().build());
 
         response.status(200);
         response.type("application/json");
