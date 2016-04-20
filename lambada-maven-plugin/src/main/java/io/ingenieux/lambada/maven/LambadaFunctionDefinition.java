@@ -17,173 +17,159 @@
 package io.ingenieux.lambada.maven;
 
 import org.apache.commons.lang3.builder.CompareToBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class LambadaFunctionDefinition
-    implements Comparable<LambadaFunctionDefinition> {
+        implements Comparable<LambadaFunctionDefinition> {
 
-  String name;
+    String name;
 
-  String alias;
+    String alias;
 
-  String description;
+    String description;
 
-  int memorySize;
+    int memorySize;
 
-  String role;
+    String role;
 
-  int timeout;
+    int timeout;
 
-  String handler;
+    String handler;
 
-  APIGatewayDefinition api = null;
+    APIGatewayDefinition api = null;
 
-  public String getName() {
-    return name;
-  }
+    List<String> bindings = new ArrayList<>();
 
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public String getAlias() {
-    return alias;
-  }
-
-  public void setAlias(String alias) {
-    this.alias = alias;
-  }
-
-  public String getDescription() {
-    return description;
-  }
-
-  public void setDescription(String description) {
-    this.description = description;
-  }
-
-  public int getMemorySize() {
-    return memorySize;
-  }
-
-  public void setMemorySize(int memorySize) {
-    this.memorySize = memorySize;
-  }
-
-  public String getRole() {
-    return role;
-  }
-
-  public void setRole(String role) {
-    this.role = role;
-  }
-
-  public int getTimeout() {
-    return timeout;
-  }
-
-  public void setTimeout(int timeout) {
-    this.timeout = timeout;
-  }
-
-  public String getHandler() {
-    return handler;
-  }
-
-  public void setHandler(String handler) {
-    this.handler = handler;
-  }
-
-  public APIGatewayDefinition getApi() {
-    return api;
-  }
-
-  public void setApi(APIGatewayDefinition api) {
-    this.api = api;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+    public String getName() {
+        return name;
     }
 
-    LambadaFunctionDefinition that = (LambadaFunctionDefinition) o;
-
-    if (memorySize != that.memorySize) {
-      return false;
-    }
-    if (timeout != that.timeout) {
-      return false;
-    }
-    if (name != null ? !name.equals(that.name) : that.name != null) {
-      return false;
-    }
-    if (alias != null ? !alias.equals(that.alias) : that.alias != null) {
-      return false;
-    }
-    if (description != null ? !description.equals(that.description)
-                            : that.description != null) {
-      return false;
-    }
-    if (role != null ? !role.equals(that.role) : that.role != null) {
-      return false;
-    }
-    if (handler != null ? !handler.equals(that.handler) : that.handler != null) {
-      return false;
-    }
-    return api != null ? api.equals(that.api) : that.api == null;
-
-  }
-
-  @Override
-  public int hashCode() {
-    int result = name != null ? name.hashCode() : 0;
-    result = 31 * result + (alias != null ? alias.hashCode() : 0);
-    result = 31 * result + (description != null ? description.hashCode() : 0);
-    result = 31 * result + memorySize;
-    result = 31 * result + (role != null ? role.hashCode() : 0);
-    result = 31 * result + timeout;
-    result = 31 * result + (handler != null ? handler.hashCode() : 0);
-    result = 31 * result + (api != null ? api.hashCode() : 0);
-    return result;
-  }
-
-  @Override
-  public String toString() {
-    return new ToStringBuilder(this)
-        .append("name", name)
-        .append("alias", alias)
-        .append("description", description)
-        .append("memorySize", memorySize)
-        .append("role", role)
-        .append("timeout", timeout)
-        .append("handler", handler)
-        .append("api", api)
-        .toString();
-  }
-
-  @Override
-  public int compareTo(LambadaFunctionDefinition o) {
-    if (o == this) {
-      return 0;
-    }
-    if (null == o) {
-      return -1;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    return new CompareToBuilder()
-        .append(this.name, o.name)
-        .append(this.alias, o.alias)
-        .append(this.description, o.description)
-        .append(this.memorySize, o.memorySize)
-        .append(this.role, o.role)
-        .append(this.timeout, o.timeout)
-        .append(this.handler, o.handler)
-        .append(this.api, o.api)
-        .toComparison();
-  }
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public int getMemorySize() {
+        return memorySize;
+    }
+
+    public void setMemorySize(int memorySize) {
+        this.memorySize = memorySize;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    public int getTimeout() {
+        return timeout;
+    }
+
+    public void setTimeout(int timeout) {
+        this.timeout = timeout;
+    }
+
+    public String getHandler() {
+        return handler;
+    }
+
+    public void setHandler(String handler) {
+        this.handler = handler;
+    }
+
+    public APIGatewayDefinition getApi() {
+        return api;
+    }
+
+    public void setApi(APIGatewayDefinition api) {
+        this.api = api;
+    }
+
+    public List<String> getBindings() {
+        return bindings;
+    }
+
+    public void setBindings(List<String> bindings) {
+        this.bindings = bindings;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        LambadaFunctionDefinition that = (LambadaFunctionDefinition) o;
+
+        return new EqualsBuilder()
+                .append(memorySize, that.memorySize)
+                .append(timeout, that.timeout)
+                .append(name, that.name)
+                .append(alias, that.alias)
+                .append(description, that.description)
+                .append(role, that.role)
+                .append(handler, that.handler)
+                .append(api, that.api)
+                .append(bindings, that.bindings)
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .append(name)
+                .append(alias)
+                .append(description)
+                .append(memorySize)
+                .append(role)
+                .append(timeout)
+                .append(handler)
+                .append(api)
+                .append(bindings)
+                .toHashCode();
+    }
+
+    @Override
+    public int compareTo(LambadaFunctionDefinition o) {
+        if (this == o)
+            return 0;
+
+        if (null == o)
+            return 1;
+
+        return new CompareToBuilder()
+                .append(this.name, o.name)
+                .append(this.alias, o.alias)
+                .append(this.description, o.description)
+                .append(this.memorySize, o.memorySize)
+                .append(this.role, o.role)
+                .append(this.timeout, o.timeout)
+                .append(this.handler, o.handler)
+                .append(this.api, o.api)
+                .append(this.bindings, o.bindings)
+                .toComparison();
+    }
 }

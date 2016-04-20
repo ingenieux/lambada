@@ -37,6 +37,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -279,6 +280,8 @@ public class LambadaGenerateMojo
         if (isNotBlank(lF.description())) {
             result.setDescription(lF.description());  // #5
         }
+
+        result.setBindings(Arrays.asList(lF.bindings()));
 
         if (null != lF.api() && 1 == lF.api().length) {
             ApiGateway apiGatewayAnn = lF.api()[0];
