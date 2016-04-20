@@ -26,7 +26,7 @@
 
     <groupId>io.ingenieux.lambada</groupId>
     <artifactId>lambada</artifactId>
-    <version>0.0.2</version>
+    <version>0.0.3-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>lambada</name>
