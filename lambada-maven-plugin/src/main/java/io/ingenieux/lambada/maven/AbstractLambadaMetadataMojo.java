@@ -52,7 +52,7 @@ public abstract class AbstractLambadaMetadataMojo extends AbstractMojo {
      * Maven Project
      */
     @Parameter(defaultValue = "${project}", required = true)
-    private MavenProject project;
+    protected MavenProject project;
 
     static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 

@@ -19,10 +19,73 @@ package io.ingenieux.lambada.testing;
 import com.amazonaws.services.lambda.runtime.ClientContext;
 import com.amazonaws.services.lambda.runtime.CognitoIdentity;
 import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.LambdaLogger;
 
-import org.immutables.value.Value;
+import java.util.UUID;
 
-@Value.Immutable
-public interface LambadaContext extends Context {
+import lombok.Builder;
+import lombok.Getter;
 
+/**
+ * <pre>{
+ "callbackWaitsForEmptyEventLoop": true,
+ "logGroupName": "/aws/lambda/fp_echo",
+ "logStreamName": "2016/04/23/[$LATEST]ad837f6486c5408cbcc06919f517299c",
+ "functionName": "fp_echo",
+ "memoryLimitInMB": "128",
+ "functionVersion": "$LATEST",
+ "invokeid": "4b15692d-091b-11e6-bf20-7fe08e57ecf0",
+ "awsRequestId": "4b15692d-091b-11e6-bf20-7fe08e57ecf0",
+ "invokedFunctionArn": "arn:aws:lambda:us-east-1:235368163414:function:fp_echo"
+ }</pre>
+ */
+
+@Builder
+public class LambadaContext implements Context {
+    @Getter
+    final String awsRequestId = UUID.randomUUID().toString().toLowerCase();
+
+    final long timeoutsAt;
+
+    @Getter
+    final String functionName;
+
+    @Override
+    public String getLogGroupName() {
+        return String.format("/aws/lambda/%s", functionName);
+    }
+
+    @Override
+    public int getRemainingTimeInMillis() {
+        return (int) (timeoutsAt - System.currentTimeMillis());
+    }
+
+    @Getter
+    final int memoryLimitInMB;
+
+    @Getter
+    String logStreamName;
+
+    @Getter
+    LambdaLogger logger = msg -> System.err.println(msg);
+
+    @Getter
+    String functionVersion = "$LATEST";
+
+    String invokedFunctionArn;
+
+    @Override
+    public String getInvokedFunctionArn() {
+        if (null != invokedFunctionArn) {
+            return invokedFunctionArn;
+        } else {
+            return "arn:aws:lambda:us-east-1:235368163414:function:" + functionName;
+        }
+    }
+
+    @Getter
+    CognitoIdentity identity;
+
+    @Getter
+    ClientContext clientContext;
 }

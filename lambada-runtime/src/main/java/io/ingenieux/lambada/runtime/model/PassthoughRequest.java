@@ -26,12 +26,15 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PassthoughRequest<T> {
@@ -41,8 +44,9 @@ public class PassthoughRequest<T> {
     }
 
     public static <T> PassthoughRequest<T> getRequest(ObjectMapper mapper, Class<T> clazz, InputStream inputStream) throws IOException {
-        final JavaType typeReference = mapper.
-                getTypeFactory()
+        final TypeFactory typeFactory = mapper.getTypeFactory();
+
+        final JavaType typeReference = typeFactory
                 .constructParametrizedType(PassthoughRequest.class, PassthoughRequest.class, clazz);
 
         return mapper.readValue(inputStream, typeReference);
@@ -60,7 +64,7 @@ public class PassthoughRequest<T> {
     }
 
     @JsonProperty("stage-variables")
-    Map<String, String> stageVariables;
+    Map<String, String> stageVariables = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
     public Map<String, String> getStageVariables() {
         return stageVariables;
@@ -71,7 +75,7 @@ public class PassthoughRequest<T> {
     }
 
     @JsonProperty("context")
-    RequestContext context;
+    RequestContext context = new RequestContext();
 
     public RequestContext getContext() {
         return context;
@@ -82,7 +86,7 @@ public class PassthoughRequest<T> {
     }
 
     @JsonProperty("params")
-    Params params;
+    Params params = new Params();
 
     public Params getParams() {
         return params;
@@ -101,7 +105,7 @@ public class PassthoughRequest<T> {
 
     public static class Params {
         @JsonProperty("path")
-        Map<String, String> path;
+        Map<String, String> path = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
         public Map<String, String> getPath() {
             return path;
@@ -112,7 +116,7 @@ public class PassthoughRequest<T> {
         }
 
         @JsonProperty("querystring")
-        Map<String, String> queryString;
+        Map<String, String> queryString = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
         public Map<String, String> getQueryString() {
             return queryString;
@@ -123,7 +127,7 @@ public class PassthoughRequest<T> {
         }
 
         @JsonProperty("header")
-        Map<String, String> header;
+        Map<String, String> header = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
         public Map<String, String> getHeader() {
             return header;
@@ -194,7 +198,7 @@ public class PassthoughRequest<T> {
         @JsonProperty("resource-path")
         private String resourcePath;
         @JsonIgnore
-        private Map<String, Object> additionalProperties = new HashMap<String, Object>();
+        private Map<String, Object> additionalProperties = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
         /**
          *

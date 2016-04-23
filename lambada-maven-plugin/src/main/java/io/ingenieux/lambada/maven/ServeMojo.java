@@ -21,25 +21,35 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.nio.charset.Charset;
+import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import io.ingenieux.lambada.invoker.Invoker;
 import io.ingenieux.lambada.invoker.UserHandlerFactory;
 import io.ingenieux.lambada.runtime.ApiGateway;
 import io.ingenieux.lambada.runtime.LambadaFunction;
-import io.ingenieux.lambada.testing.ImmutableLambadaContext;
+import io.ingenieux.lambada.runtime.model.PassthoughRequest;
+import io.ingenieux.lambada.testing.LambadaContext;
 import spark.Request;
 import spark.Response;
 
+import static java.util.Arrays.asList;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static spark.Spark.awaitInitialization;
 import static spark.Spark.get;
@@ -49,195 +59,310 @@ import static spark.Spark.stop;
 import static spark.Spark.threadPool;
 
 @Mojo(name = "serve", requiresDirectInvocation = true, requiresProject = true,
-    defaultPhase = LifecyclePhase.PROCESS_CLASSES,
-    requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
+        defaultPhase = LifecyclePhase.PROCESS_CLASSES,
+        requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
 public class ServeMojo extends AbstractLambadaMetadataMojo {
+    @Parameter(defaultValue = "${session}", required = true)
+    protected MavenSession session;
 
-  /**
-   * Port to Use
-   */
-  @Parameter(property = "lambada.port", defaultValue = "8080")
-  Integer serverPort;
-  private final Set<PathHandler> pathHandlers = new TreeSet<PathHandler>();
+    /**
+     * Regex to Find Stage Parameters
+     */
+    public static final Pattern KEY_STAGE_VARIABLE_REGEX = Pattern.compile("^apigateway\\.stage\\.([^\\.]{3,}).(.+)$");
 
-  @Override
-  protected void executeInternal() throws Exception {
-    loadPathHandlers();
+    @Parameter(property = "apigateway.stageName", required = true, defaultValue = "dev")
+    protected String stageName;
 
-    port(serverPort);
-
-    threadPool(8);
-
-    setupServer();
-
-    awaitInitialization();
-
-    while (10 != System.in.read()) {
-      Thread.sleep(500);
-    }
-
-    stop();
-  }
-
-  private void setupServer() {
-    for (PathHandler p : pathHandlers) {
-      if (p.getMethodType() == ApiGateway.MethodType.GET) {
-        get(p.getPath(), p::handle);
-      } else if (p.getMethodType() == ApiGateway.MethodType.POST) {
-        post(p.getPath(), p::handle);
-      }
-    }
-  }
-
-  public void loadPathHandlers() throws Exception {
-    final Set<Method> methodsAnnotatedWith = extractRuntimeAnnotations(LambadaFunction.class);
-
-    getLog().info("There are " + methodsAnnotatedWith.size() + " found methods.");
-
-    for (Method m : methodsAnnotatedWith) {
-      final LambadaFunction annotation = m.getAnnotation(LambadaFunction.class);
-
-      if (null == annotation.api() || 1 != annotation.api().length)
-        return;
-
-      ApiGateway a = annotation.api()[0];
-
-      PathHandler pathHandler = new PathHandler();
-
-      pathHandler.setPath(a.path());
-      pathHandler.setMethod(m);
-
-      boolean bStatic = Modifier.isStatic(m.getModifiers());
-
-      // TODO: ApiGateway
-      getLog().info("Class: " + m.getDeclaringClass().getName());
-
-      if (!bStatic) {
-        try {
-          pathHandler.setInstance(m.getDeclaringClass().newInstance());
-        } catch (Exception exc) {
-          throw new RuntimeException("Unable to create class " + m.getDeclaringClass(), exc);
-        }
-      }
-
-      pathHandler.setMethodType(a.method());
-
-      getLog().info("Added path handler: " + pathHandler);
-
-      pathHandlers.add(pathHandler.build());
-    }
-
-
-  }
-
-  class PathHandler implements Comparable<PathHandler> {
-
-    String path;
-
-    public String getPath() {
-      return path;
-    }
-
-    public void setPath(String path) {
-      this.path = path;
-    }
-
-    ApiGateway.MethodType methodType;
-
-    public ApiGateway.MethodType getMethodType() {
-      return methodType;
-    }
-
-    public void setMethodType(ApiGateway.MethodType methodType) {
-      this.methodType = methodType;
-    }
-
-    Object instance;
-
-    public Object getInstance() {
-      return instance;
-    }
-
-    public void setInstance(Object instance) {
-      this.instance = instance;
-    }
-
-    Method method;
-
-    public Method getMethod() {
-      return method;
-    }
-
-    public void setMethod(Method method) {
-      this.method = method;
-    }
+    /**
+     * Port to Use
+     */
+    @Parameter(property = "lambada.port", defaultValue = "8080")
+    Integer serverPort;
+    private final Set<PathHandler> pathHandlers = new TreeSet<PathHandler>();
 
     @Override
-    public int compareTo(PathHandler o) {
-      return path.compareTo(o.path);
-    }
+    protected void executeInternal() throws Exception {
+        setupStageVariables();
 
-    @Override
-    public String toString() {
-      return "PathHandler{" +
-             "path='" + path + '\'' +
-             ", methodType=" + methodType +
-             ", instance=" + instance +
-             ", method=" + method +
-             '}';
-    }
+        loadPathHandlers();
 
-    Invoker invoker = null;
+        port(serverPort);
 
-    public PathHandler build() {
-      invoker = new Invoker();
+        threadPool(8);
 
-      invoker.setUserHandler(UserHandlerFactory.findUserFactory(this.instance, this.method));
+        setupServer();
 
-      if (null == invoker.getUserHandler())
-        throw new IllegalArgumentException("Oops: Unable to build an path handler for " + this.toString());
+        awaitInitialization();
 
-      return this;
-    }
-
-    public Object handle(Request request, Response response) throws Exception {
-      InputStream is = IOUtils.toInputStream(defaultString(request.body(), "null"));
-      ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-      try {
-        invoker.invoke(is, baos, ImmutableLambadaContext.builder().build());
-
-        response.status(200);
-        response.type("application/json");
-
-        if (0 == baos.size()) {
-          return "null";
-        } else {
-          try {
-            JsonNode asJsonNode = OBJECT_MAPPER.readValue(baos.toByteArray(), JsonNode.class);
-
-            return asJsonNode;
-          } catch (Exception e) {
-            response.type("text/plain");
-
-            return new String(baos.toByteArray());
-          }
+        while (10 != System.in.read()) {
+            Thread.sleep(500);
         }
-      } catch (Exception exc) {
-        response.status(500);
-        response.type("application/json");
 
-        if (OBJECT_MAPPER.canSerialize(exc.getClass())) {
-          return OBJECT_MAPPER.writeValueAsString(exc);
-        } else {
-          ObjectNode parentNode = OBJECT_MAPPER.createObjectNode();
-
-          parentNode.put("message", exc.getMessage());
-          parentNode.put("class", exc.getClass().getName());
-
-          return parentNode;
-        }
-      }
+        stop();
     }
-  }
+
+    Map<String, String> stageVariables;
+
+    private void setupStageVariables() {
+        Map<String, String> result = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+
+        Properties properties = new Properties();
+
+        properties.putAll(project.getProperties());
+        properties.putAll(session.getUserProperties());
+
+        properties
+                .entrySet()
+                .stream()
+                .forEach(entry -> {
+                    String key = "" + entry.getKey();
+                    String value = "";
+
+                    final Matcher matcherKeyVariable = KEY_STAGE_VARIABLE_REGEX.matcher(key);
+
+                    if (!matcherKeyVariable.matches())
+                        return;
+
+                    if (null != entry.getValue()) {
+                        value = "" + entry.getValue();
+                    }
+
+                    String stageName = matcherKeyVariable.group(1);
+                    String stageProperty = matcherKeyVariable.group(2);
+                    String stagePropertyValue = value;
+
+                    if (stageName.equalsIgnoreCase(this.stageName)) {
+                        getLog().info("Setting Stage Variable " + stageProperty + "=" + stagePropertyValue);
+                        result.put(stageProperty, stagePropertyValue);
+                    }
+
+                });
+
+        this.stageVariables = result;
+    }
+
+    private void setupServer() {
+        String prefix = "/" + this.stageName;
+
+        for (PathHandler p : pathHandlers) {
+            if (p.getMethodType() == ApiGateway.MethodType.GET) {
+                get(prefix + p.getPath(), p::handle);
+            } else if (p.getMethodType() == ApiGateway.MethodType.POST) {
+                post(prefix + p.getPath(), p::handle);
+            }
+        }
+    }
+
+    public void loadPathHandlers() throws Exception {
+        final Set<Method> methodsAnnotatedWith = extractRuntimeAnnotations(LambadaFunction.class);
+
+        getLog().info("There are " + methodsAnnotatedWith.size() + " found methods.");
+
+        for (Method m : methodsAnnotatedWith) {
+            final LambadaFunction annotation = m.getAnnotation(LambadaFunction.class);
+
+            if (null == annotation.api() || 1 != annotation.api().length)
+                return;
+
+            ApiGateway a = annotation.api()[0];
+
+            PathHandler pathHandler = new PathHandler();
+
+            pathHandler.setLambadaFunction(annotation);
+            pathHandler.setPath(a.path());
+            pathHandler.setMethod(m);
+
+            boolean bStatic = Modifier.isStatic(m.getModifiers());
+
+            // TODO: ApiGateway
+            getLog().info("Class: " + m.getDeclaringClass().getName());
+
+            if (!bStatic) {
+                try {
+                    pathHandler.setInstance(m.getDeclaringClass().newInstance());
+                } catch (Exception exc) {
+                    throw new RuntimeException("Unable to create class " + m.getDeclaringClass(), exc);
+                }
+            }
+
+            pathHandler.setMethodType(a.method());
+
+            getLog().info("Added path handler: " + pathHandler);
+
+            pathHandlers.add(pathHandler.build());
+        }
+
+
+    }
+
+    class PathHandler implements Comparable<PathHandler> {
+
+        String path;
+        private LambadaFunction lambadaFunction;
+
+        public String getPath() {
+            return path;
+        }
+
+        public void setPath(String path) {
+            this.path = path.replaceAll("\\{([^}]+)\\}", ":$1");
+        }
+
+        ApiGateway.MethodType methodType;
+
+        public ApiGateway.MethodType getMethodType() {
+            return methodType;
+        }
+
+        public void setMethodType(ApiGateway.MethodType methodType) {
+            this.methodType = methodType;
+        }
+
+        Object instance;
+
+        public Object getInstance() {
+            return instance;
+        }
+
+        public void setInstance(Object instance) {
+            this.instance = instance;
+        }
+
+        Method method;
+
+        public Method getMethod() {
+            return method;
+        }
+
+        public void setMethod(Method method) {
+            this.method = method;
+        }
+
+        @Override
+        public int compareTo(PathHandler o) {
+            return path.compareTo(o.path);
+        }
+
+        @Override
+        public String toString() {
+            return "PathHandler{" +
+                    "path='" + path + '\'' +
+                    ", methodType=" + methodType +
+                    ", instance=" + instance +
+                    ", method=" + method +
+                    '}';
+        }
+
+        Invoker invoker = null;
+
+        public PathHandler build() {
+            invoker = new Invoker();
+
+            invoker.setUserHandler(UserHandlerFactory.findUserFactory(this.instance, this.method));
+
+            if (null == invoker.getUserHandler())
+                throw new IllegalArgumentException("Oops: Unable to build an path handler for " + this.toString());
+
+            return this;
+        }
+
+        public Object handle(Request request, Response response) throws Exception {
+            PassthoughRequest<JsonNode> node = buildPassthroughtRequest(request);
+
+            InputStream is = IOUtils.toInputStream(OBJECT_MAPPER.writeValueAsString(node));
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+            try {
+                final LambadaContext.LambadaContextBuilder builder = LambadaContext.builder();
+
+                builder.memoryLimitInMB(this.lambadaFunction.memorySize());
+                builder.functionName(defaultString(this.lambadaFunction.alias(), this.lambadaFunction.name()));
+                builder.timeoutsAt(this.lambadaFunction.timeout() * 1000 + System.currentTimeMillis());
+
+                invoker.invoke(is, baos, builder.build());
+
+                response.status(200);
+                response.type("application/json");
+
+                if (0 == baos.size()) {
+                    return "null";
+                } else {
+                    try {
+                        JsonNode asJsonNode = OBJECT_MAPPER.readValue(baos.toByteArray(), JsonNode.class);
+
+                        return asJsonNode;
+                    } catch (Exception e) {
+                        response.type("text/plain");
+
+                        return new String(baos.toByteArray());
+                    }
+                }
+            } catch (Exception exc) {
+                response.status(500);
+                response.type("application/json");
+
+                if (OBJECT_MAPPER.canSerialize(exc.getClass())) {
+                    return OBJECT_MAPPER.writeValueAsString(exc);
+                } else {
+                    ObjectNode parentNode = OBJECT_MAPPER.createObjectNode();
+
+                    parentNode.put("message", exc.getMessage());
+                    parentNode.put("class", exc.getClass().getName());
+
+                    return parentNode;
+                }
+            }
+        }
+
+        public void setLambadaFunction(LambadaFunction lambadaFunction) {
+            this.lambadaFunction = lambadaFunction;
+        }
+    }
+
+    private PassthoughRequest<JsonNode> buildPassthroughtRequest(Request request) throws Exception {
+        final String bodyJsonNode = defaultIfBlank(request.body(), "null");
+
+        PassthoughRequest<JsonNode> node = new PassthoughRequest<>();
+
+        final JsonNode body = OBJECT_MAPPER.readTree(bodyJsonNode);
+
+        boolean looksLikePassthrough = asList("body-json", "params", "stage-variables", "context")
+                .stream().map(x -> {
+                    JsonNode childNode = body.path(x);
+
+                    return !childNode.isMissingNode();
+                }).filter(x -> x).count() > 2;
+
+        if (looksLikePassthrough) {
+            node = PassthoughRequest.getRequest(
+                    OBJECT_MAPPER,
+                    JsonNode.class,
+                    new ByteArrayInputStream(bodyJsonNode.getBytes(Charset.defaultCharset())));
+
+            node.getStageVariables().putAll(this.stageVariables);
+
+            return node;
+        } else {
+            final PassthoughRequest<JsonNode> finalNode = node;
+
+            node.setBody(body);
+
+            request.params().entrySet().forEach(e -> {
+                finalNode.getParams().getPath().put(e.getKey().substring(1), e.getValue());
+            });
+
+            request.queryParams().forEach(x -> {
+                finalNode.getParams().getQueryString().put(x, request.queryParams(x));
+            });
+
+            request.headers().forEach(x -> {
+                finalNode.getParams().getHeader().put(x, request.headers(x));
+            });
+
+            finalNode.getStageVariables().putAll(this.stageVariables);
+
+            return finalNode;
+        }
+    }
 }
