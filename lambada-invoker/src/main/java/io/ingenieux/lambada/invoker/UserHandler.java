@@ -16,12 +16,11 @@
 
 package io.ingenieux.lambada.invoker;
 
-import com.amazonaws.services.lambda.runtime.Context;
-
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
+
+import com.amazonaws.services.lambda.runtime.Context;
 
 public abstract class UserHandler {
     protected final Object instance;

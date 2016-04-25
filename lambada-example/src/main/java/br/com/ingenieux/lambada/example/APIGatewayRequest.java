@@ -1,8 +1,5 @@
 package br.com.ingenieux.lambada.example;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
