@@ -49,6 +49,7 @@ import io.ingenieux.lambada.testing.LambadaContext;
 import spark.Request;
 import spark.Response;
 
+import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static spark.Spark.awaitInitialization;
@@ -93,6 +94,10 @@ public class ServeMojo extends AbstractLambadaMetadataMojo {
         setupServer();
 
         awaitInitialization();
+
+        getLog().info(
+                format("Server is alive on http://%s:%d/%s/", "127.0.0.1", this.serverPort, this.stageName)
+        );
 
         while (10 != System.in.read()) {
             Thread.sleep(500);
@@ -187,7 +192,7 @@ public class ServeMojo extends AbstractLambadaMetadataMojo {
 
             pathHandler.setMethodType(a.method());
 
-            getLog().info("Added path handler: " + pathHandler);
+            getLog().info("Added path handler: " + pathHandler.getPath());
 
             pathHandlers.add(pathHandler.build());
         }
