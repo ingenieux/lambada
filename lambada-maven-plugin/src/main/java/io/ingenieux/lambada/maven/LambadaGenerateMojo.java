@@ -193,6 +193,7 @@ public class LambadaGenerateMojo
                 .stream()
                 .filter(lf -> null != lf.getApi())
                 .filter(lf -> "default".equals(lf.getApi().getTemplate()))
+                .filter(lf -> lf.getApi().getMethodType() == APIGatewayDefinition.MethodType.POST)
                 .forEach(pg::generateDefinition);
 
         String finalContent = OBJECT_MAPPER.writeValueAsString(docNode);
