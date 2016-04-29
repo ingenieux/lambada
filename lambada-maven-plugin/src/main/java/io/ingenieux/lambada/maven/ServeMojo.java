@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -245,7 +246,7 @@ public class ServeMojo extends AbstractLambadaMetadataMojo {
 
         @Override
         public int compareTo(PathHandler o) {
-            return path.compareTo(o.path);
+            return new CompareToBuilder().append(this.path, o.path).append(this.methodType, o.getMethodType()).toComparison();
         }
 
         @Override
@@ -304,11 +305,22 @@ public class ServeMojo extends AbstractLambadaMetadataMojo {
                     }
                 }
             } catch (Exception exc) {
+                getLog().warn("Exception: ", exc);
+
                 response.status(500);
                 response.type("application/json");
 
                 if (OBJECT_MAPPER.canSerialize(exc.getClass())) {
-                    return OBJECT_MAPPER.writeValueAsString(exc);
+                    try {
+                        return OBJECT_MAPPER.writeValueAsString(exc);
+                    } catch (Exception e) {
+                        ObjectNode parentNode = OBJECT_MAPPER.createObjectNode();
+
+                        parentNode.put("message", exc.getMessage());
+                        parentNode.put("class", exc.getClass().getName());
+
+                        return parentNode;
+                    }
                 } else {
                     ObjectNode parentNode = OBJECT_MAPPER.createObjectNode();
 

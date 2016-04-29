@@ -52,7 +52,9 @@ public abstract class AbstractLambadaMetadataMojo extends AbstractMojo {
     @Parameter(defaultValue = "${project}", required = true)
     protected MavenProject project;
 
-    static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
+            .enable(SerializationFeature.INDENT_OUTPUT)
+            .enable(DeserializationFeature.WRAP_EXCEPTIONS);
 
     static {
         OBJECT_MAPPER.enable(SerializationFeature.INDENT_OUTPUT);
