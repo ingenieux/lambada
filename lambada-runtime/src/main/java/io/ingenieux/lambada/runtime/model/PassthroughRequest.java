@@ -17,11 +17,6 @@
 
 package io.ingenieux.lambada.runtime.model;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Map;
-import java.util.TreeMap;
-
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -33,18 +28,23 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class PassthoughRequest<T> {
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Map;
+import java.util.TreeMap;
 
-    public static PassthoughRequest<ObjectNode> getRequest(ObjectMapper mapper, InputStream inputStream) throws IOException {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class PassthroughRequest<T> {
+
+    public static PassthroughRequest<ObjectNode> getRequest(ObjectMapper mapper, InputStream inputStream) throws IOException {
         return getRequest(mapper, ObjectNode.class, inputStream);
     }
 
-    public static <T> PassthoughRequest<T> getRequest(ObjectMapper mapper, Class<T> clazz, InputStream inputStream) throws IOException {
+    public static <T> PassthroughRequest<T> getRequest(ObjectMapper mapper, Class<T> clazz, InputStream inputStream) throws IOException {
         final TypeFactory typeFactory = mapper.getTypeFactory();
 
         final JavaType typeReference = typeFactory
-                .constructParametrizedType(PassthoughRequest.class, PassthoughRequest.class, clazz);
+                .constructParametrizedType(PassthroughRequest.class, PassthroughRequest.class, clazz);
 
         return mapper.readValue(inputStream, typeReference);
     }

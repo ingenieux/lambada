@@ -45,7 +45,7 @@ import io.ingenieux.lambada.invoker.Invoker;
 import io.ingenieux.lambada.invoker.UserHandlerFactory;
 import io.ingenieux.lambada.runtime.ApiGateway;
 import io.ingenieux.lambada.runtime.LambadaFunction;
-import io.ingenieux.lambada.runtime.model.PassthoughRequest;
+import io.ingenieux.lambada.runtime.model.PassthroughRequest;
 import io.ingenieux.lambada.testing.LambadaContext;
 import spark.Request;
 import spark.Response;
@@ -273,7 +273,7 @@ public class ServeMojo extends AbstractLambadaMetadataMojo {
         }
 
         public Object handle(Request request, Response response) throws Exception {
-            PassthoughRequest<JsonNode> node = buildPassthroughtRequest(request);
+            PassthroughRequest<JsonNode> node = buildPassthroughtRequest(request);
 
             InputStream is = IOUtils.toInputStream(OBJECT_MAPPER.writeValueAsString(node));
 
@@ -337,10 +337,10 @@ public class ServeMojo extends AbstractLambadaMetadataMojo {
         }
     }
 
-    private PassthoughRequest<JsonNode> buildPassthroughtRequest(Request request) throws Exception {
+    private PassthroughRequest<JsonNode> buildPassthroughtRequest(Request request) throws Exception {
         final String bodyJsonNode = defaultIfBlank(request.body(), "null");
 
-        PassthoughRequest<JsonNode> node = new PassthoughRequest<>();
+        PassthroughRequest<JsonNode> node = new PassthroughRequest<>();
 
         final JsonNode body = OBJECT_MAPPER.readTree(bodyJsonNode);
 
@@ -352,7 +352,7 @@ public class ServeMojo extends AbstractLambadaMetadataMojo {
                 }).filter(x -> x).count() > 2;
 
         if (looksLikePassthrough) {
-            node = PassthoughRequest.getRequest(
+            node = PassthroughRequest.getRequest(
                     OBJECT_MAPPER,
                     JsonNode.class,
                     new ByteArrayInputStream(bodyJsonNode.getBytes(Charset.defaultCharset())));
@@ -361,7 +361,7 @@ public class ServeMojo extends AbstractLambadaMetadataMojo {
 
             return node;
         } else {
-            final PassthoughRequest<JsonNode> finalNode = node;
+            final PassthroughRequest<JsonNode> finalNode = node;
 
             node.setBody(body);
 

@@ -23,7 +23,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import io.ingenieux.lambada.runtime.model.BodyFunction;
-import io.ingenieux.lambada.runtime.model.PassthoughRequest;
+import io.ingenieux.lambada.runtime.model.PassthroughRequest;
 
 public class LambadaUtils {
     private LambadaUtils() {
@@ -33,7 +33,7 @@ public class LambadaUtils {
             InputStream inputStream,
             OutputStream outputStream,
             Class<I> inputClass,
-            BodyFunction<PassthoughRequest<I>, O> func) throws Exception {
+            BodyFunction<PassthroughRequest<I>, O> func) throws Exception {
         wrap(new ObjectMapper(), inputStream, outputStream, inputClass, func);
     }
 
@@ -42,8 +42,9 @@ public class LambadaUtils {
             InputStream inputStream,
             OutputStream outputStream,
             Class<I> inputClass,
-            BodyFunction<PassthoughRequest<I>, O> func) throws Exception {
-        PassthoughRequest<I> request = PassthoughRequest.getRequest(mapper, inputClass, inputStream);
+            BodyFunction<PassthroughRequest<I>, O> func) throws Exception {
+        PassthroughRequest<I>
+            request = PassthroughRequest.getRequest(mapper, inputClass, inputStream);
 
         O output = func.execute(request);
 
