@@ -16,15 +16,13 @@
 
 package io.ingenieux.lambada.maven;
 
-import java.io.File;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import com.google.common.base.Charsets;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -34,11 +32,15 @@ import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;
 import org.reflections.util.ConfigurationBuilder;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.google.common.base.Charsets;
+import java.io.File;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * A Abstract Metadata Extractor for Lambada Mojos
@@ -54,14 +56,14 @@ public abstract class AbstractLambadaMetadataMojo extends AbstractMojo {
 
     static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
             .enable(SerializationFeature.INDENT_OUTPUT)
-            .enable(DeserializationFeature.WRAP_EXCEPTIONS);
-
-    static {
-        OBJECT_MAPPER.enable(SerializationFeature.INDENT_OUTPUT);
-        OBJECT_MAPPER.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-        OBJECT_MAPPER.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        OBJECT_MAPPER.setSerializationInclusion(JsonInclude.Include.NON_DEFAULT);
-    }
+            .enable(DeserializationFeature.WRAP_EXCEPTIONS)
+            .enable(SerializationFeature.INDENT_OUTPUT)
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+            .enable(JsonParser.Feature.ALLOW_COMMENTS)
+            .enable(JsonParser.Feature.ALLOW_YAML_COMMENTS)
+            .enable(JsonParser.Feature.STRICT_DUPLICATE_DETECTION)
+            .setSerializationInclusion(JsonInclude.Include.NON_DEFAULT);
 
     protected String defaultIfBlank(String one, String another) {
         return (null != one && (!one.trim().equals(""))) ? one : another;
