@@ -63,12 +63,6 @@ public class LambadaGenerateMojo
     private File outputFile;
 
     /**
-     * Location of the APIGatewayDefinition-only functions
-     */
-    @Parameter(defaultValue = "${project.build.outputDirectory}/META-INF/apigateway/apigateway-swagger.json", property = "lambada.apiGatewayFile")
-    private File apiGatewayFile;
-
-    /**
      * Default Invoker Role
      */
     @Parameter(defaultValue = "apigateway-lambda-invoker", property = "lambada.apiGatewayInvokerRole")
@@ -84,13 +78,6 @@ public class LambadaGenerateMojo
 
     @Override
     protected void executeInternal() throws Exception {
-        {
-            MustacheFactory mf = new DefaultMustacheFactory();
-
-            this.template = mf.compile(new StringReader(STR_METHOD_DEFINITION),
-                    "path-definition");
-        }
-
         outputFile.getParentFile().mkdirs();
 
         final Set<Method> methodsAnnotatedWith = extractRuntimeAnnotations(LambadaFunction.class);
@@ -105,100 +92,6 @@ public class LambadaGenerateMojo
         final List<LambadaFunctionDefinition> defList = new ArrayList<>(definitionTreeSet);
 
         OBJECT_MAPPER.writeValue(new FileOutputStream(outputFile), defList);
-
-        rewriteTemplates(definitionTreeSet);
-    }
-
-    private static final String STR_METHOD_DEFINITION = "{\n" +
-            "  \"consumes\":[" +
-            "    \"application/json\"" +
-            "  ]," +
-            "  \"produces\":[" +
-            "    \"application/json\"" +
-            "  ]," +
-            "  \"responses\":{" +
-            "    \"200\":{" +
-            "      \"description\":\"200 response\"," +
-            "      \"schema\":{" +
-            "        \"$ref\":\"#/definitions/Empty\"" +
-            "      }" +
-            "    }" +
-            "  }," +
-            "  \"x-amazon-apigateway-integration\":{" +
-            "    \"type\":\"aws\"," +
-            "    \"responses\":{" +
-            "      \"default\":{" +
-            "        \"statusCode\":\"200\"" +
-            "      }" +
-            "    }," +
-            "    \"requestTemplates\":{" +
-            "      \"application/json\":\"##  See http://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-mapping-template-reference.html\\n##  This template will pass through all parameters including path, querystring, header, stage variables, and context through to the integration endpoint via the body/payload\\n#set($allParams = $input.params())\\n{\\n\\\"body-json\\\" : $input.json('$'),\\n\\\"params\\\" : {\\n#foreach($type in $allParams.keySet())\\n    #set($params = $allParams.get($type))\\n\\\"$type\\\" : {\\n    #foreach($paramName in $params.keySet())\\n    \\\"$paramName\\\" : \\\"$util.escapeJavaScript($params.get($paramName))\\\"\\n        #if($foreach.hasNext),#end\\n    #end\\n}\\n    #if($foreach.hasNext),#end\\n#end\\n},\\n\\\"stage-variables\\\" : {\\n#foreach($key in $stageVariables.keySet())\\n\\\"$key\\\" : \\\"$util.escapeJavaScript($stageVariables.get($key))\\\"\\n    #if($foreach.hasNext),#end\\n#end\\n},\\n\\\"context\\\" : {\\n    \\\"account-id\\\" : \\\"$context.identity.accountId\\\",\\n    \\\"api-id\\\" : \\\"$context.apiId\\\",\\n    \\\"api-key\\\" : \\\"$context.identity.apiKey\\\",\\n    \\\"authorizer-principal-id\\\" : \\\"$context.authorizer.principalId\\\",\\n    \\\"caller\\\" : \\\"$context.identity.caller\\\",\\n    \\\"cognito-authentication-provider\\\" : \\\"$context.identity.cognitoAuthenticationProvider\\\",\\n    \\\"cognito-authentication-type\\\" : \\\"$context.identity.cognitoAuthenticationType\\\",\\n    \\\"cognito-identity-id\\\" : \\\"$context.identity.cognitoIdentityId\\\",\\n    \\\"cognito-identity-pool-id\\\" : \\\"$context.identity.cognitoIdentityPoolId\\\",\\n    \\\"http-method\\\" : \\\"$context.httpMethod\\\",\\n    \\\"stage\\\" : \\\"$context.stage\\\",\\n    \\\"source-ip\\\" : \\\"$context.identity.sourceIp\\\",\\n    \\\"user\\\" : \\\"$context.identity.user\\\",\\n    \\\"user-agent\\\" : \\\"$context.identity.userAgent\\\",\\n    \\\"user-arn\\\" : \\\"$context.identity.userArn\\\",\\n    \\\"request-id\\\" : \\\"$context.requestId\\\",\\n    \\\"resource-id\\\" : \\\"$context.resourceId\\\",\\n    \\\"resource-path\\\" : \\\"$context.resourcePath\\\"\\n    }\\n}\\n\"" +
-            "    }," +
-            "    \"credentials\":\"arn:aws:iam:::role/{{apiGatewayInvokerRole}}\"," +
-            "    \"uri\":\"arn:aws:apigateway:{{region}}:lambda:path/2015-03-31/functions/arn:aws:lambda:{{region}}::function:{{functionName}}/invocations\"," +
-            "    \"httpMethod\":\"{{httpMethod}}\"" +
-            "  }\n" +
-            "}";
-
-    private static final String CORS_DEFINITION = "{\n" +
-            "  \"consumes\":[" +
-            "    \"application/json\"" +
-            "  ]," +
-            "  \"produces\":[" +
-            "    \"application/json\"" +
-            "  ]," +
-            "  \"responses\":{" +
-            "    \"200\":{" +
-            "      \"description\":\"200 response\"," +
-            "      \"schema\":{" +
-            "        \"$ref\":\"#/definitions/Empty\"" +
-            "      }" +
-            "    }" +
-            "  }," +
-            "  \"x-amazon-apigateway-integration\":{" +
-            "    \"type\":\"aws\"," +
-            "    \"responses\":{" +
-            "      \"default\":{" +
-            "        \"statusCode\":\"200\"" +
-            "      }" +
-            "    }," +
-            "    \"requestTemplates\":{" +
-            "      \"application/json\":\"##  See http://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-mapping-template-reference.html\\n##  This template will pass through all parameters including path, querystring, header, stage variables, and context through to the integration endpoint via the body/payload\\n#set($allParams = $input.params())\\n{\\n\\\"body-json\\\" : $input.json('$'),\\n\\\"params\\\" : {\\n#foreach($type in $allParams.keySet())\\n    #set($params = $allParams.get($type))\\n\\\"$type\\\" : {\\n    #foreach($paramName in $params.keySet())\\n    \\\"$paramName\\\" : \\\"$util.escapeJavaScript($params.get($paramName))\\\"\\n        #if($foreach.hasNext),#end\\n    #end\\n}\\n    #if($foreach.hasNext),#end\\n#end\\n},\\n\\\"stage-variables\\\" : {\\n#foreach($key in $stageVariables.keySet())\\n\\\"$key\\\" : \\\"$util.escapeJavaScript($stageVariables.get($key))\\\"\\n    #if($foreach.hasNext),#end\\n#end\\n},\\n\\\"context\\\" : {\\n    \\\"account-id\\\" : \\\"$context.identity.accountId\\\",\\n    \\\"api-id\\\" : \\\"$context.apiId\\\",\\n    \\\"api-key\\\" : \\\"$context.identity.apiKey\\\",\\n    \\\"authorizer-principal-id\\\" : \\\"$context.authorizer.principalId\\\",\\n    \\\"caller\\\" : \\\"$context.identity.caller\\\",\\n    \\\"cognito-authentication-provider\\\" : \\\"$context.identity.cognitoAuthenticationProvider\\\",\\n    \\\"cognito-authentication-type\\\" : \\\"$context.identity.cognitoAuthenticationType\\\",\\n    \\\"cognito-identity-id\\\" : \\\"$context.identity.cognitoIdentityId\\\",\\n    \\\"cognito-identity-pool-id\\\" : \\\"$context.identity.cognitoIdentityPoolId\\\",\\n    \\\"http-method\\\" : \\\"$context.httpMethod\\\",\\n    \\\"stage\\\" : \\\"$context.stage\\\",\\n    \\\"source-ip\\\" : \\\"$context.identity.sourceIp\\\",\\n    \\\"user\\\" : \\\"$context.identity.user\\\",\\n    \\\"user-agent\\\" : \\\"$context.identity.userAgent\\\",\\n    \\\"user-arn\\\" : \\\"$context.identity.userArn\\\",\\n    \\\"request-id\\\" : \\\"$context.requestId\\\",\\n    \\\"resource-id\\\" : \\\"$context.resourceId\\\",\\n    \\\"resource-path\\\" : \\\"$context.resourcePath\\\"\\n    }\\n}\\n\"" +
-            "    }," +
-            "    \"credentials\":\"arn:aws:iam:::role/{{apiGatewayInvokerRole}}\"," +
-            "    \"uri\":\"arn:aws:apigateway:{{region}}:lambda:path/2015-03-31/functions/arn:aws:lambda:{{region}}::function:{{functionName}}/invocations\"," +
-            "    \"httpMethod\":\"{{httpMethod}}\"" +
-            "  }\n" +
-            "}";
-
-    private void rewriteTemplates(TreeSet<LambadaFunctionDefinition> definitionTreeSet) throws Exception {
-        if (!apiGatewayFile.exists()) {
-            getLog().info("Skipping API Gateway generation (file doesnt exist: " + apiGatewayFile.getName() + ")");
-            return;
-        }
-
-        String strDefinitions = IOUtils.toString(new FileInputStream(apiGatewayFile));
-
-        ObjectNode docNode = ObjectNode.class.cast(OBJECT_MAPPER.readTree(strDefinitions));
-
-        if (null == docNode.get("paths")) {
-            docNode.putObject("paths");
-        }
-
-        ObjectNode pathsNode = ObjectNode.class.cast(docNode.get("paths"));
-
-        PathGenerator pg = new PathGenerator(pathsNode, STR_METHOD_DEFINITION);
-
-        definitionTreeSet
-                .stream()
-                .filter(lf -> null != lf.getApi())
-                .filter(lf -> "default".equals(lf.getApi().getTemplate()))
-//              .filter(lf -> lf.getApi().getMethodType() == APIGatewayDefinition.MethodType.POST)
-                .forEach(pg::generateDefinition);
-
-        String finalContent = OBJECT_MAPPER.writeValueAsString(docNode);
-
-        IOUtils.write(finalContent.getBytes(DEFAULT_CHARSET), new FileOutputStream(apiGatewayFile));
     }
 
     private String interpolateDefinition(LambadaFunctionDefinition lambadaFunctionDefinition) throws IOException {
@@ -214,45 +107,6 @@ public class LambadaGenerateMojo
         template.execute(writer, context).flush();
 
         return writer.toString();
-    }
-
-    class PathGenerator {
-        final ObjectNode pathsNode;
-
-        final String methodDefinition;
-
-        public PathGenerator(ObjectNode pathsNode, String methodDefinition) {
-            this.pathsNode = pathsNode;
-            this.methodDefinition = methodDefinition;
-        }
-
-        public void generateDefinition(LambadaFunctionDefinition lf) {
-            try {
-                APIGatewayDefinition def = lf.getApi();
-
-                String parsedContent = interpolateDefinition(lf);
-
-                ObjectNode templateNode = ObjectNode.class.cast(OBJECT_MAPPER.readTree(parsedContent));
-
-                JsonNode _pathNode = pathsNode.path(def.getPath());
-                ObjectNode pathNode;
-
-                if (JsonNodeType.OBJECT != _pathNode.getNodeType()) {
-                    pathsNode.remove(def.getPath());
-                    pathNode = pathsNode.putObject(def.getPath());
-                } else {
-                    pathNode = ObjectNode.class.cast(_pathNode);
-                }
-
-                pathNode.set(def.getMethodType().name().toLowerCase(), templateNode);
-
-                if (def.isCorsEnabled()) {
-                    //ObjectNode corsNode =
-                }
-            } catch (Exception exc) {
-                throw new RuntimeException(exc);
-            }
-        }
     }
 
     private LambadaFunctionDefinition extractFunctionDefinitions(Method m) {
