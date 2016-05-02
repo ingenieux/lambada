@@ -21,22 +21,23 @@ import java.util.List;
 
 public class Notifier {
 
-    private static ThreadLocal<List<String>> messageList = new ThreadLocal<List<String>>() {
+  private static ThreadLocal<List<String>> messageList =
+      new ThreadLocal<List<String>>() {
         @Override
         protected List<String> initialValue() {
-            return new ArrayList<>();
+          return new ArrayList<>();
         }
-    };
+      };
 
-    public static void addMessage(String m) {
-        messageList.get().add(m);
-    }
+  public static void addMessage(String m) {
+    messageList.get().add(m);
+  }
 
-    public static void clear() {
-        messageList.get().clear();
-    }
+  public static void clear() {
+    messageList.get().clear();
+  }
 
-    public static List<String> getMessages() {
-        return messageList.get();
-    }
+  public static List<String> getMessages() {
+    return messageList.get();
+  }
 }

@@ -63,8 +63,7 @@ public class InvokerTestBase {
 
     this.lambdaLogger = new LoggerFixture();
 
-    Mockito.when(this.context.getLogger()).
-        thenReturn(this.lambdaLogger);
+    Mockito.when(this.context.getLogger()).thenReturn(this.lambdaLogger);
   }
 
   @After
@@ -83,16 +82,11 @@ public class InvokerTestBase {
   }
 
   public void thenMustSilentlyContain(String message) {
-    MatcherAssert
-        .assertThat("Must contain '" + message + "'", Notifier.getMessages(), CoreMatchers
-            .hasItem(message));
+    MatcherAssert.assertThat("Must contain '" + message + "'", Notifier.getMessages(), CoreMatchers.hasItem(message));
   }
 
   public void thenMustContain(String message) {
-    MatcherAssert
-        .assertThat("Must have called log with '" + message + "'", lambdaLogger.getMessageList(),
-                    CoreMatchers
-                        .hasItem(message));
+    MatcherAssert.assertThat("Must have called log with '" + message + "'", lambdaLogger.getMessageList(), CoreMatchers.hasItem(message));
   }
 
   public Method getMethod(String methodName) {
@@ -106,10 +100,10 @@ public class InvokerTestBase {
   }
 
   public void withInput(String string) throws Exception {
-      this.inputStream = IOUtils.toInputStream(string);
+    this.inputStream = IOUtils.toInputStream(string);
   }
 
   public void thenMustHaveWrittenOnOutputStream(String str) throws Exception {
-      assertThat(outputStream.toString("utf-8"), is(equalTo(str)));
+    assertThat(outputStream.toString("utf-8"), is(equalTo(str)));
   }
 }

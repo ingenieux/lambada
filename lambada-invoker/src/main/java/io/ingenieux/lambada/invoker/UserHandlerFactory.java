@@ -92,9 +92,7 @@ public abstract class UserHandlerFactory {
         };
       }
 
-      if (2 == m.getParameterCount() &&
-          hasReturnType(m, Void.TYPE) &&
-          hasParameterTypes(m, InputStream.class, OutputStream.class)) {
+      if (2 == m.getParameterCount() && hasReturnType(m, Void.TYPE) && hasParameterTypes(m, InputStream.class, OutputStream.class)) {
         return new UserHandler(o, m) {
           @Override
           public void invoke(InputStream is, OutputStream os, Context c) throws Exception {
@@ -103,9 +101,7 @@ public abstract class UserHandlerFactory {
         };
       }
 
-      if (3 == m.getParameterCount() &&
-                 hasReturnType(m, Void.TYPE) &&
-                 hasParameterTypes(m, InputStream.class, OutputStream.class, Context.class)) {
+      if (3 == m.getParameterCount() && hasReturnType(m, Void.TYPE) && hasParameterTypes(m, InputStream.class, OutputStream.class, Context.class)) {
         return new UserHandler(o, m) {
           public void invoke(InputStream is, OutputStream os, Context c) throws Exception {
             m.invoke(o, is, os, c);
@@ -122,8 +118,7 @@ public abstract class UserHandlerFactory {
     final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     public UserHandler getUserHandler(Object o, final Method m) {
-      if (1 == m.getParameterCount() &&
-          hasJacksonAbleParameters(m, m.getParameterTypes()[0]) && Void.TYPE.equals(m.getReturnType())) {
+      if (1 == m.getParameterCount() && hasJacksonAbleParameters(m, m.getParameterTypes()[0]) && Void.TYPE.equals(m.getReturnType())) {
         return new UserHandler(o, m) {
           @Override
           public void invoke(InputStream is, OutputStream os, Context ctx) throws Exception {
@@ -134,8 +129,7 @@ public abstract class UserHandlerFactory {
         };
       }
 
-      if (1 == m.getParameterCount() && hasJacksonAbleParameters(m, m.getParameterTypes()[0],
-                                                                 m.getReturnType())) {
+      if (1 == m.getParameterCount() && hasJacksonAbleParameters(m, m.getParameterTypes()[0], m.getReturnType())) {
         return new UserHandler(o, m) {
           @Override
           public void invoke(InputStream is, OutputStream os, Context ctx) throws Exception {
@@ -148,9 +142,7 @@ public abstract class UserHandlerFactory {
         };
       }
 
-      if (2 == m.getParameterCount() &&
-                 m.getParameterTypes()[1] == Context.class &&
-                 hasJacksonAbleParameters(m, m.getParameterTypes()[0], m.getReturnType())) {
+      if (2 == m.getParameterCount() && m.getParameterTypes()[1] == Context.class && hasJacksonAbleParameters(m, m.getParameterTypes()[0], m.getReturnType())) {
         return new UserHandler(o, m) {
           @Override
           public void invoke(InputStream is, OutputStream os, Context ctx) throws Exception {
@@ -174,8 +166,7 @@ public abstract class UserHandlerFactory {
           boolean serializeP = OBJECT_MAPPER.canSerialize((Class<?>) t);
           boolean deserializeP = OBJECT_MAPPER.canDeserialize(javaType);
 
-          if (! (serializeP && deserializeP))
-            return false;
+          if (!(serializeP && deserializeP)) return false;
         } catch (IllegalArgumentException e) {
           return false;
         }
@@ -202,12 +193,10 @@ public abstract class UserHandlerFactory {
     return true;
   }
 
-  private static final UserHandlerFactory[] factories = new UserHandlerFactory[] {
-      new NoOpUserHandlerFactory(),
-      new RawUserHandlerFactory(),
-      new JacksonAbleUserHandlerFactory(),
+  private static final UserHandlerFactory[] factories =
+      new UserHandlerFactory[] {
+        new NoOpUserHandlerFactory(), new RawUserHandlerFactory(), new JacksonAbleUserHandlerFactory(),
       };
-
 
   public static UserHandler findUserFactory(Object o, Method m) {
     UserHandler h = null;

@@ -23,14 +23,14 @@ import java.lang.reflect.Method;
 import com.amazonaws.services.lambda.runtime.Context;
 
 public abstract class UserHandler {
-    protected final Object instance;
+  protected final Object instance;
 
-    protected final Method method;
+  protected final Method method;
 
-    public UserHandler(Object instance, Method method) {
-        this.instance = instance;
-        this.method = method;
-    }
+  public UserHandler(Object instance, Method method) {
+    this.instance = instance;
+    this.method = method;
+  }
 
-    public abstract void invoke(InputStream is, OutputStream os, Context ctx) throws Exception;
+  public abstract void invoke(InputStream is, OutputStream os, Context ctx) throws Exception;
 }

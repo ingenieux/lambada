@@ -46,67 +46,67 @@ import java.util.Set;
  * A Abstract Metadata Extractor for Lambada Mojos
  */
 public abstract class AbstractLambadaMetadataMojo extends AbstractMojo {
-    public static final Charset DEFAULT_CHARSET = Charsets.UTF_8;
+  public static final Charset DEFAULT_CHARSET = Charsets.UTF_8;
 
-    /**
-     * Maven Project
-     */
-    @Parameter(defaultValue = "${project}", required = true)
-    protected MavenProject project;
+  /**
+   * Maven Project
+   */
+  @Parameter(defaultValue = "${project}", required = true)
+  protected MavenProject project;
 
-    static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
-            .enable(SerializationFeature.INDENT_OUTPUT)
-            .enable(DeserializationFeature.WRAP_EXCEPTIONS)
-            .enable(SerializationFeature.INDENT_OUTPUT)
-            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-            .setSerializationInclusion(JsonInclude.Include.NON_NULL)
-            .enable(JsonParser.Feature.ALLOW_COMMENTS)
-            .enable(JsonParser.Feature.ALLOW_YAML_COMMENTS)
-            .enable(JsonParser.Feature.STRICT_DUPLICATE_DETECTION)
-            .setSerializationInclusion(JsonInclude.Include.NON_DEFAULT);
+  static final ObjectMapper OBJECT_MAPPER =
+      new ObjectMapper()
+          .enable(SerializationFeature.INDENT_OUTPUT)
+          .enable(DeserializationFeature.WRAP_EXCEPTIONS)
+          .enable(SerializationFeature.INDENT_OUTPUT)
+          .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+          .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+          .enable(JsonParser.Feature.ALLOW_COMMENTS)
+          .enable(JsonParser.Feature.ALLOW_YAML_COMMENTS)
+          .enable(JsonParser.Feature.STRICT_DUPLICATE_DETECTION)
+          .setSerializationInclusion(JsonInclude.Include.NON_DEFAULT);
 
-    protected String defaultIfBlank(String one, String another) {
-        return (null != one && (!one.trim().equals(""))) ? one : another;
+  protected String defaultIfBlank(String one, String another) {
+    return (null != one && (!one.trim().equals(""))) ? one : another;
+  }
+
+  public void setClasspathUrls(ConfigurationBuilder configurationBuilder) {
+    List<String> classpathElements = null;
+    try {
+      classpathElements = project.getCompileClasspathElements();
+      List<URL> projectClasspathList = new ArrayList<URL>();
+
+      for (String element : classpathElements) {
+        projectClasspathList.add(new File(element).toURI().toURL());
+      }
+
+      configurationBuilder.addUrls(projectClasspathList);
+
+      configurationBuilder.addClassLoader(new URLClassLoader(projectClasspathList.toArray(new URL[0]), Thread.currentThread().getContextClassLoader()));
+    } catch (Exception e) {
+      throw new RuntimeException(e.getMessage());
     }
+  }
 
-    public void setClasspathUrls(ConfigurationBuilder configurationBuilder) {
-        List<String> classpathElements = null;
-        try {
-            classpathElements = project.getCompileClasspathElements();
-            List<URL> projectClasspathList = new ArrayList<URL>();
-
-            for (String element : classpathElements) {
-                projectClasspathList.add(new File(element).toURI().toURL());
-            }
-
-            configurationBuilder.addUrls(projectClasspathList);
-
-            configurationBuilder.addClassLoader(new URLClassLoader(projectClasspathList.toArray(new URL[0]), Thread.currentThread().getContextClassLoader()));
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
-        }
+  public void execute() throws MojoExecutionException {
+    try {
+      executeInternal();
+    } catch (Exception exc) {
+      throw new MojoExecutionException("Failure", exc);
     }
+  }
 
-    public void execute()
-            throws MojoExecutionException {
-        try {
-            executeInternal();
-        } catch (Exception exc) {
-            throw new MojoExecutionException("Failure", exc);
-        }
-    }
+  protected abstract void executeInternal() throws Exception;
 
-    protected abstract void executeInternal() throws Exception;
+  protected Set<Method> extractRuntimeAnnotations(Class<? extends Annotation> annotation) {
+    ConfigurationBuilder cfg = new ConfigurationBuilder();
 
-    protected Set<Method> extractRuntimeAnnotations(Class<? extends Annotation> annotation) {
-        ConfigurationBuilder cfg = new ConfigurationBuilder();
+    cfg.setScanners(new MethodAnnotationsScanner());
 
-        cfg.setScanners(new MethodAnnotationsScanner());
+    setClasspathUrls(cfg);
 
-        setClasspathUrls(cfg);
+    final Reflections ref = new Reflections(cfg);
 
-        final Reflections ref = new Reflections(cfg);
-
-        return ref.getMethodsAnnotatedWith(annotation);
-    }
+    return ref.getMethodsAnnotatedWith(annotation);
+  }
 }

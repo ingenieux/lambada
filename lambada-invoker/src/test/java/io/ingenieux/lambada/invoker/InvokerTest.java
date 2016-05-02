@@ -20,57 +20,55 @@ import org.junit.Test;
 
 public class InvokerTest extends InvokerTestBase {
 
-    @Test
-    public void testDoSomethingAsANoOp() throws Exception {
-        givenMethod("doSomethingAsANoOp");
+  @Test
+  public void testDoSomethingAsANoOp() throws Exception {
+    givenMethod("doSomethingAsANoOp");
 
-        whenInvoked();
+    whenInvoked();
 
-        thenMustSilentlyContain("doSomethingAsANoOp");
-    }
+    thenMustSilentlyContain("doSomethingAsANoOp");
+  }
 
-    @Test
-    public void doSomethingAsANoOpButWithContext() throws Exception {
-        givenMethod("doSomethingAsANoOpButWithContext");
+  @Test
+  public void doSomethingAsANoOpButWithContext() throws Exception {
+    givenMethod("doSomethingAsANoOpButWithContext");
 
-        whenInvoked();
+    whenInvoked();
 
-        thenMustContain("doSomethingAsANoOpButWithContext");
-    }
+    thenMustContain("doSomethingAsANoOpButWithContext");
+  }
 
-    @Test
-    public void testSomethingRaw() throws Exception {
-        givenMethod("doSomethingRaw");
+  @Test
+  public void testSomethingRaw() throws Exception {
+    givenMethod("doSomethingRaw");
 
-        withInput("1");
+    withInput("1");
 
-        whenInvoked();
+    whenInvoked();
 
-        thenMustHaveWrittenOnOutputStream("2");
-    }
+    thenMustHaveWrittenOnOutputStream("2");
+  }
 
-    @Test
-    public void testSomethingRawWithContext() throws Exception {
-        givenMethod("doSomethingRawWithContext");
+  @Test
+  public void testSomethingRawWithContext() throws Exception {
+    givenMethod("doSomethingRawWithContext");
 
-        withInput("1");
+    withInput("1");
 
-        whenInvoked();
+    whenInvoked();
 
-        thenMustContain("4");
-        thenMustHaveWrittenOnOutputStream("2");
-    }
+    thenMustContain("4");
+    thenMustHaveWrittenOnOutputStream("2");
+  }
 
-    @Test
-    public void testSomethingWithJackson() throws Exception {
-        givenMethod("doSomethingWithJackson");
+  @Test
+  public void testSomethingWithJackson() throws Exception {
+    givenMethod("doSomethingWithJackson");
 
-        withInput("\"doSomethingWithJackson\"");
+    withInput("\"doSomethingWithJackson\"");
 
-        whenInvoked();
+    whenInvoked();
 
-        thenMustSilentlyContain("doSomethingWithJackson");
-    }
-
-
+    thenMustSilentlyContain("doSomethingWithJackson");
+  }
 }

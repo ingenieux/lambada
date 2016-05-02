@@ -26,28 +26,20 @@ import io.ingenieux.lambada.runtime.model.BodyFunction;
 import io.ingenieux.lambada.runtime.model.PassthroughRequest;
 
 public class LambadaUtils {
-    private LambadaUtils() {
-    }
+  private LambadaUtils() {}
 
-    public static <I, O> void wrap(
-            InputStream inputStream,
-            OutputStream outputStream,
-            Class<I> inputClass,
-            BodyFunction<PassthroughRequest<I>, O> func) throws Exception {
-        wrap(new ObjectMapper(), inputStream, outputStream, inputClass, func);
-    }
+  public static <I, O> void wrap(InputStream inputStream, OutputStream outputStream, Class<I> inputClass, BodyFunction<PassthroughRequest<I>, O> func)
+      throws Exception {
+    wrap(new ObjectMapper(), inputStream, outputStream, inputClass, func);
+  }
 
-    public static <I, O> void wrap(
-            ObjectMapper mapper,
-            InputStream inputStream,
-            OutputStream outputStream,
-            Class<I> inputClass,
-            BodyFunction<PassthroughRequest<I>, O> func) throws Exception {
-        PassthroughRequest<I>
-            request = PassthroughRequest.getRequest(mapper, inputClass, inputStream);
+  public static <I, O> void wrap(
+      ObjectMapper mapper, InputStream inputStream, OutputStream outputStream, Class<I> inputClass, BodyFunction<PassthroughRequest<I>, O> func)
+      throws Exception {
+    PassthroughRequest<I> request = PassthroughRequest.getRequest(mapper, inputClass, inputStream);
 
-        O output = func.execute(request);
+    O output = func.execute(request);
 
-        mapper.writeValue(outputStream, output);
-    }
+    mapper.writeValue(outputStream, output);
+  }
 }

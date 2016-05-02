@@ -23,20 +23,21 @@ import java.util.Arrays;
 import static org.junit.Assert.assertNotNull;
 
 public class UserHandlerFactoryTest extends InvokerTestBase {
-    @Test
-    public void testFindMethods() {
-        for (String methodName : Arrays.asList(
-                "doSomethingAsANoOp",
-                "doSomethingAsANoOpButWithContext",
-                "doSomethingRaw",
-                "doSomethingRawWithContext",
-                "doSomethingWithJackson",
-                "doSomethingWithJacksonAndContext")) {
-            givenMethod(methodName);
+  @Test
+  public void testFindMethods() {
+    for (String methodName :
+        Arrays.asList(
+            "doSomethingAsANoOp",
+            "doSomethingAsANoOpButWithContext",
+            "doSomethingRaw",
+            "doSomethingRawWithContext",
+            "doSomethingWithJackson",
+            "doSomethingWithJacksonAndContext")) {
+      givenMethod(methodName);
 
-            System.err.println("methodName: " + m);
+      System.err.println("methodName: " + m);
 
-            assertNotNull(this.invoker.getUserHandler());
-        }
+      assertNotNull(this.invoker.getUserHandler());
     }
+  }
 }

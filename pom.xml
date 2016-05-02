@@ -15,7 +15,9 @@
   ~ limitations under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -119,7 +121,7 @@
                     <configuration>
                         <skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
                     </configuration>
-                    <executions />
+                    <executions/>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -147,6 +149,28 @@
                     <groupId>io.ingenieux.lambada</groupId>
                     <artifactId>lambada-maven-plugin</artifactId>
                     <version>${project.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>com.theoryinpractise</groupId>
+                    <artifactId>googleformatter-maven-plugin</artifactId>
+                    <version>1.0.3</version>
+                    <executions>
+                        <execution>
+                            <id>reformat-sources</id>
+                            <configuration>
+                                <includeStale>false</includeStale>
+                                <maxWidth>160</maxWidth>
+                                <sortImports>NO</sortImports>
+                                <javadocFormatter>NONE</javadocFormatter>
+                                <style>GOOGLE</style>
+                                <skip>false</skip>
+                            </configuration>
+                            <goals>
+                                <goal>format</goal>
+                            </goals>
+                            <phase>process-sources</phase>
+                        </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -298,6 +322,19 @@
             <modules>
                 <module>lambada-example</module>
             </modules>
+        </profile>
+
+        <profile>
+            <id>reformat</id>
+            <build>
+                <defaultGoal>process-sources</defaultGoal>
+                <plugins>
+                    <plugin>
+                        <groupId>com.theoryinpractise</groupId>
+                        <artifactId>googleformatter-maven-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 </project>

@@ -22,17 +22,17 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public class Invoker {
-    UserHandler userHandler;
+  UserHandler userHandler;
 
-    public UserHandler getUserHandler() {
-        return userHandler;
-    }
+  public UserHandler getUserHandler() {
+    return userHandler;
+  }
 
-    public void setUserHandler(UserHandler userHandler) {
-        this.userHandler = userHandler;
-    }
+  public void setUserHandler(UserHandler userHandler) {
+    this.userHandler = userHandler;
+  }
 
-    public void invoke(InputStream is, OutputStream os, Context context) throws Exception {
-        userHandler.invoke(is, os, context);
-    }
+  public void invoke(InputStream is, OutputStream os, Context context) throws Exception {
+    userHandler.invoke(is, os, context);
+  }
 }

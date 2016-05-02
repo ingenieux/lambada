@@ -27,45 +27,45 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface LambadaFunction {
-    /**
-     * Function name. Defaults to method name
-     */
-    String name() default "";
+  /**
+   * Function name. Defaults to method name
+   */
+  String name() default "";
 
-    /**
-     * Function alias. Optional.
-     */
-    String alias() default "";
+  /**
+   * Function alias. Optional.
+   */
+  String alias() default "";
 
-    /**
-     * Function description.
-     */
-    String description() default "";
+  /**
+   * Function description.
+   */
+  String description() default "";
 
-    /**
-     * Memory Size, in MB
-     */
-    int memorySize() default 0;
+  /**
+   * Memory Size, in MB
+   */
+  int memorySize() default 0;
 
-    /**
-     * AWS Role
-     */
-    String role() default "";
+  /**
+   * AWS Role
+   */
+  String role() default "";
 
-    /**
-     * Timeout
-     */
-    int timeout() default 0;
+  /**
+   * Timeout
+   */
+  int timeout() default 0;
 
-    /**
-     * AWS API Gateway Endpoint (Optional)
-     *
-     * @return endpoint
-     */
-    ApiGateway[] api() default {};
+  /**
+   * AWS API Gateway Endpoint (Optional)
+   *
+   * @return endpoint
+   */
+  ApiGateway[] api() default {};
 
-    /**
-     * Bindings to ARNs to Use
-     */
-    String[] bindings() default {};
+  /**
+   * Bindings to ARNs to Use
+   */
+  String[] bindings() default {};
 }

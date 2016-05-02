@@ -50,107 +50,106 @@ import io.ingenieux.lambada.runtime.LambadaFunction;
 
 import static org.codehaus.plexus.util.StringUtils.isNotBlank;
 
-@Mojo(name = "generate",
-        requiresProject = true,
-        defaultPhase = LifecyclePhase.PROCESS_CLASSES,
-        requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
-public class LambadaGenerateMojo
-        extends AbstractLambadaMetadataMojo {
-    /**
-     * Location of the file for Lambda + APIGatewayDefinition Functions
-     */
-    @Parameter(defaultValue = "${project.build.outputDirectory}/META-INF/lambda-definitions.json", property = "lambada.outputFile", required = true)
-    private File outputFile;
+@Mojo(
+  name = "generate",
+  requiresProject = true,
+  defaultPhase = LifecyclePhase.PROCESS_CLASSES,
+  requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME
+)
+public class LambadaGenerateMojo extends AbstractLambadaMetadataMojo {
+  /**
+   * Location of the file for Lambda + APIGatewayDefinition Functions
+   */
+  @Parameter(defaultValue = "${project.build.outputDirectory}/META-INF/lambda-definitions.json", property = "lambada.outputFile", required = true)
+  private File outputFile;
 
-    /**
-     * Default Invoker Role
-     */
-    @Parameter(defaultValue = "apigateway-lambda-invoker", property = "lambada.apiGatewayInvokerRole")
-    private String apiGatewayInvokerRole;
+  /**
+   * Default Invoker Role
+   */
+  @Parameter(defaultValue = "apigateway-lambda-invoker", property = "lambada.apiGatewayInvokerRole")
+  private String apiGatewayInvokerRole;
 
-    /**
-     * Default Invoker Role
-     */
-    @Parameter(defaultValue = "us-east-1", property = "beanstalker.region", required = true)
-    private String region;
+  /**
+   * Default Invoker Role
+   */
+  @Parameter(defaultValue = "us-east-1", property = "beanstalker.region", required = true)
+  private String region;
 
-    private Mustache template;
+  private Mustache template;
 
-    @Override
-    protected void executeInternal() throws Exception {
-        outputFile.getParentFile().mkdirs();
+  @Override
+  protected void executeInternal() throws Exception {
+    outputFile.getParentFile().mkdirs();
 
-        final Set<Method> methodsAnnotatedWith = extractRuntimeAnnotations(LambadaFunction.class);
+    final Set<Method> methodsAnnotatedWith = extractRuntimeAnnotations(LambadaFunction.class);
 
-        // TODO: Validate clashing paths
+    // TODO: Validate clashing paths
 
-        final TreeSet<LambadaFunctionDefinition> definitionTreeSet = methodsAnnotatedWith
-                .stream()
-                .map(this::extractFunctionDefinitions)
-                .collect(Collectors.toCollection(TreeSet::new));
+    final TreeSet<LambadaFunctionDefinition> definitionTreeSet =
+        methodsAnnotatedWith.stream().map(this::extractFunctionDefinitions).collect(Collectors.toCollection(TreeSet::new));
 
-        final List<LambadaFunctionDefinition> defList = new ArrayList<>(definitionTreeSet);
+    final List<LambadaFunctionDefinition> defList = new ArrayList<>(definitionTreeSet);
 
-        OBJECT_MAPPER.writeValue(new FileOutputStream(outputFile), defList);
+    OBJECT_MAPPER.writeValue(new FileOutputStream(outputFile), defList);
+  }
+
+  private String interpolateDefinition(LambadaFunctionDefinition lambadaFunctionDefinition) throws IOException {
+    Map<String, String> context = new HashMap<>();
+
+    context.put("region", region);
+    context.put("functionName", lambadaFunctionDefinition.getName());
+    context.put("apiGatewayInvokerRole", apiGatewayInvokerRole);
+    context.put("httpMethod", lambadaFunctionDefinition.getApi().getMethodType().toString().toLowerCase());
+
+    StringWriter writer = new StringWriter();
+
+    template.execute(writer, context).flush();
+
+    return writer.toString();
+  }
+
+  private LambadaFunctionDefinition extractFunctionDefinitions(Method m) {
+    LambadaFunction lF = m.getAnnotation(LambadaFunction.class);
+
+    final LambadaFunctionDefinition result = new LambadaFunctionDefinition();
+
+    final String name = defaultIfBlank(lF.name(), m.getName());
+
+    result.setName(name); // #1
+
+    final String handler = m.getDeclaringClass().getCanonicalName() + "::" + m.getName();
+
+    result.setAlias(lF.alias());
+
+    result.setHandler(handler);
+
+    result.setMemorySize(lF.memorySize()); // #2
+
+    if (isNotBlank(lF.role())) {
+      result.setRole(lF.role()); // #3
     }
 
-    private String interpolateDefinition(LambadaFunctionDefinition lambadaFunctionDefinition) throws IOException {
-        Map<String, String> context = new HashMap<>();
+    result.setTimeout(lF.timeout()); // #4
 
-        context.put("region", region);
-        context.put("functionName", lambadaFunctionDefinition.getName());
-        context.put("apiGatewayInvokerRole", apiGatewayInvokerRole);
-        context.put("httpMethod", lambadaFunctionDefinition.getApi().getMethodType().toString().toLowerCase());
-
-        StringWriter writer = new StringWriter();
-
-        template.execute(writer, context).flush();
-
-        return writer.toString();
+    if (isNotBlank(lF.description())) {
+      result.setDescription(lF.description()); // #5
     }
 
-    private LambadaFunctionDefinition extractFunctionDefinitions(Method m) {
-        LambadaFunction lF = m.getAnnotation(LambadaFunction.class);
+    result.setBindings(Arrays.asList(lF.bindings()));
 
-        final LambadaFunctionDefinition result = new LambadaFunctionDefinition();
+    if (null != lF.api() && 1 == lF.api().length) {
+      ApiGateway apiGatewayAnn = lF.api()[0];
 
-        final String name = defaultIfBlank(lF.name(), m.getName());
+      APIGatewayDefinition def = new APIGatewayDefinition();
 
-        result.setName(name); // #1
+      def.setMethodType(APIGatewayDefinition.MethodType.valueOf(apiGatewayAnn.method().name()));
+      def.setPath(apiGatewayAnn.path());
+      def.setTemplate(apiGatewayAnn.template());
+      def.setCorsEnabled(apiGatewayAnn.corsEnabled());
 
-        final String handler = m.getDeclaringClass().getCanonicalName() + "::" + m.getName();
-
-        result.setAlias(lF.alias());
-
-        result.setHandler(handler);
-
-        result.setMemorySize(lF.memorySize()); // #2
-
-        if (isNotBlank(lF.role())) {
-            result.setRole(lF.role()); // #3
-        }
-
-        result.setTimeout(lF.timeout());  // #4
-
-        if (isNotBlank(lF.description())) {
-            result.setDescription(lF.description());  // #5
-        }
-
-        result.setBindings(Arrays.asList(lF.bindings()));
-
-        if (null != lF.api() && 1 == lF.api().length) {
-            ApiGateway apiGatewayAnn = lF.api()[0];
-
-            APIGatewayDefinition def = new APIGatewayDefinition();
-
-            def.setMethodType(APIGatewayDefinition.MethodType.valueOf(apiGatewayAnn.method().name()));
-            def.setPath(apiGatewayAnn.path());
-            def.setTemplate(apiGatewayAnn.template());
-            def.setCorsEnabled(apiGatewayAnn.corsEnabled());
-
-            result.setApi(def);
-        }
-
-        return result;
+      result.setApi(def);
     }
+
+    return result;
+  }
 }

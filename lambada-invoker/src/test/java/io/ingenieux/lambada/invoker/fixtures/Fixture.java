@@ -25,35 +25,35 @@ import java.io.OutputStream;
 
 public class Fixture {
 
-    public void doSomethingAsANoOp() {
-        Notifier.addMessage("doSomethingAsANoOp");
-    }
+  public void doSomethingAsANoOp() {
+    Notifier.addMessage("doSomethingAsANoOp");
+  }
 
-    public void doSomethingAsANoOpButWithContext(Context c) {
-        c.getLogger().log("doSomethingAsANoOpButWithContext");
-    }
+  public void doSomethingAsANoOpButWithContext(Context c) {
+    c.getLogger().log("doSomethingAsANoOpButWithContext");
+  }
 
-    public void doSomethingRaw(InputStream is, OutputStream os) throws Exception {
-        Integer value = Integer.valueOf(IOUtils.toString(is));
+  public void doSomethingRaw(InputStream is, OutputStream os) throws Exception {
+    Integer value = Integer.valueOf(IOUtils.toString(is));
 
-        IOUtils.write("" + (2 * value), os);
-    }
+    IOUtils.write("" + (2 * value), os);
+  }
 
-    public void doSomethingRawWithContext(InputStream is, OutputStream os, Context c) throws Exception {
-        Integer value = Integer.valueOf(IOUtils.toString(is));
+  public void doSomethingRawWithContext(InputStream is, OutputStream os, Context c) throws Exception {
+    Integer value = Integer.valueOf(IOUtils.toString(is));
 
-        final int result = 2 * value;
+    final int result = 2 * value;
 
-        c.getLogger().log("" + (result * 2));
+    c.getLogger().log("" + (result * 2));
 
-        IOUtils.write("" + result, os);
-    }
+    IOUtils.write("" + result, os);
+  }
 
-    public void doSomethingWithJackson(String message) {
-        Notifier.addMessage(message);
-    }
+  public void doSomethingWithJackson(String message) {
+    Notifier.addMessage(message);
+  }
 
-    public String doSomethingWithJacksonAndContext(Integer something, Context c) {
-        return "Hello";
-    }
+  public String doSomethingWithJacksonAndContext(Integer something, Context c) {
+    return "Hello";
+  }
 }
