@@ -17,10 +17,16 @@
 
 package io.ingenieux.lambada.runtime;
 
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Reader;
 
 import io.ingenieux.lambada.runtime.model.BodyFunction;
 import io.ingenieux.lambada.runtime.model.PassthroughRequest;
@@ -36,10 +42,44 @@ public class LambadaUtils {
   public static <I, O> void wrap(
       ObjectMapper mapper, InputStream inputStream, OutputStream outputStream, Class<I> inputClass, BodyFunction<PassthroughRequest<I>, O> func)
       throws Exception {
-    PassthroughRequest<I> request = PassthroughRequest.getRequest(mapper, inputClass, inputStream);
+    PassthroughRequest<I> request = getRequest(mapper, inputClass, inputStream);
 
     O output = func.execute(request);
 
     mapper.writeValue(outputStream, output);
+  }
+
+  public static <T> JavaType getReferenceFor(ObjectMapper mapper, Class<T> clazz) {
+    final TypeFactory typeFactory = mapper.getTypeFactory();
+
+    return typeFactory.constructParametrizedType(PassthroughRequest.class, PassthroughRequest.class, clazz);
+  }
+
+  public static <T> PassthroughRequest<T> getRequest(ObjectMapper mapper, Class<T> clazz, Reader node) throws IOException {
+    final JavaType typeReference = getReferenceFor(mapper, clazz);
+
+    return mapper.convertValue(node, typeReference);
+  }
+
+  public static PassthroughRequest<ObjectNode> getRequest(ObjectMapper mapper, InputStream inputStream) throws IOException {
+    return getRequest(mapper, ObjectNode.class, inputStream);
+  }
+
+  public static <T> PassthroughRequest<T> getRequest(ObjectMapper mapper, Class<T> clazz, InputStream inputStream) throws IOException {
+    final JavaType typeReference = getReferenceFor(mapper, clazz);
+
+    return mapper.readValue(inputStream, typeReference);
+  }
+
+  public static <T> PassthroughRequest<T> getRequest(ObjectMapper mapper, Class<T> clazz, JsonNode node) throws IOException {
+    final JavaType typeReference = getReferenceFor(mapper, clazz);
+
+    return mapper.convertValue(node, typeReference);
+  }
+
+  public static <T> PassthroughRequest<T> getRequest(ObjectMapper mapper, Class<T> clazz, String nodeJsonContent) throws IOException {
+    final JavaType typeReference = getReferenceFor(mapper, clazz);
+
+    return mapper.convertValue(nodeJsonContent, typeReference);
   }
 }

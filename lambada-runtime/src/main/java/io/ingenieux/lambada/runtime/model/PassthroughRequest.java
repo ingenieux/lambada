@@ -23,55 +23,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.type.TypeFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
 import java.util.Map;
 import java.util.TreeMap;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PassthroughRequest<T> {
-
-  public static PassthroughRequest<ObjectNode> getRequest(ObjectMapper mapper, InputStream inputStream) throws IOException {
-    return getRequest(mapper, ObjectNode.class, inputStream);
-  }
-
-  public static <T> PassthroughRequest<T> getRequest(ObjectMapper mapper, Class<T> clazz, InputStream inputStream) throws IOException {
-    final JavaType typeReference = getReferenceFor(mapper, clazz);
-
-    return mapper.readValue(inputStream, typeReference);
-  }
-
-  public static <T> PassthroughRequest<T> getRequest(ObjectMapper mapper, Class<T> clazz, JsonNode node) throws IOException {
-    final JavaType typeReference = getReferenceFor(mapper, clazz);
-
-    return mapper.convertValue(node, typeReference);
-  }
-
-  public static <T> PassthroughRequest<T> getRequest(ObjectMapper mapper, Class<T> clazz, String nodeJsonContent) throws IOException {
-    final JavaType typeReference = getReferenceFor(mapper, clazz);
-
-    return mapper.convertValue(nodeJsonContent, typeReference);
-  }
-
-  public static <T> PassthroughRequest<T> getRequest(ObjectMapper mapper, Class<T> clazz, Reader node) throws IOException {
-    final JavaType typeReference = getReferenceFor(mapper, clazz);
-
-    return mapper.convertValue(node, typeReference);
-  }
-
-  static <T> JavaType getReferenceFor(ObjectMapper mapper, Class<T> clazz) {
-    final TypeFactory typeFactory = mapper.getTypeFactory();
-
-    return typeFactory.constructParametrizedType(PassthroughRequest.class, PassthroughRequest.class, clazz);
-  }
-
   @JsonProperty("body-json")
   T body;
 
@@ -230,12 +187,11 @@ public class PassthroughRequest<T> {
     @JsonProperty("resource-path")
     private String resourcePath;
 
-    @JsonIgnore private Map<String, Object> additionalProperties = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+    @JsonIgnore
+    private Map<String, Object> additionalProperties = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
     /**
-     *
-     * @return
-     * The accountId
+     * @return The accountId
      */
     @JsonProperty("account-id")
     public String getAccountId() {
@@ -243,9 +199,7 @@ public class PassthroughRequest<T> {
     }
 
     /**
-     *
-     * @param accountId
-     * The account-id
+     * @param accountId The account-id
      */
     @JsonProperty("account-id")
     public void setAccountId(String accountId) {
@@ -253,9 +207,7 @@ public class PassthroughRequest<T> {
     }
 
     /**
-     *
-     * @return
-     * The apiId
+     * @return The apiId
      */
     @JsonProperty("api-id")
     public String getApiId() {
@@ -263,9 +215,7 @@ public class PassthroughRequest<T> {
     }
 
     /**
-     *
-     * @param apiId
-     * The api-id
+     * @param apiId The api-id
      */
     @JsonProperty("api-id")
     public void setApiId(String apiId) {
@@ -273,9 +223,7 @@ public class PassthroughRequest<T> {
     }
 
     /**
-     *
-     * @return
-     * The apiKey
+     * @return The apiKey
      */
     @JsonProperty("api-key")
     public String getApiKey() {
@@ -283,9 +231,7 @@ public class PassthroughRequest<T> {
     }
 
     /**
-     *
-     * @param apiKey
-     * The api-key
+     * @param apiKey The api-key
      */
     @JsonProperty("api-key")
     public void setApiKey(String apiKey) {
@@ -293,9 +239,7 @@ public class PassthroughRequest<T> {
     }
 
     /**
-     *
-     * @return
-     * The authorizerPrincipalId
+     * @return The authorizerPrincipalId
      */
     @JsonProperty("authorizer-principal-id")
     public String getAuthorizerPrincipalId() {
@@ -303,9 +247,7 @@ public class PassthroughRequest<T> {
     }
 
     /**
-     *
-     * @param authorizerPrincipalId
-     * The authorizer-principal-id
+     * @param authorizerPrincipalId The authorizer-principal-id
      */
     @JsonProperty("authorizer-principal-id")
     public void setAuthorizerPrincipalId(String authorizerPrincipalId) {
@@ -313,9 +255,7 @@ public class PassthroughRequest<T> {
     }
 
     /**
-     *
-     * @return
-     * The caller
+     * @return The caller
      */
     @JsonProperty("caller")
     public String getCaller() {
@@ -323,9 +263,7 @@ public class PassthroughRequest<T> {
     }
 
     /**
-     *
-     * @param caller
-     * The caller
+     * @param caller The caller
      */
     @JsonProperty("caller")
     public void setCaller(String caller) {
@@ -333,9 +271,7 @@ public class PassthroughRequest<T> {
     }
 
     /**
-     *
-     * @return
-     * The cognitoAuthenticationProvider
+     * @return The cognitoAuthenticationProvider
      */
     @JsonProperty("cognito-authentication-provider")
     public String getCognitoAuthenticationProvider() {
@@ -343,9 +279,7 @@ public class PassthroughRequest<T> {
     }
 
     /**
-     *
-     * @param cognitoAuthenticationProvider
-     * The cognito-authentication-provider
+     * @param cognitoAuthenticationProvider The cognito-authentication-provider
      */
     @JsonProperty("cognito-authentication-provider")
     public void setCognitoAuthenticationProvider(String cognitoAuthenticationProvider) {
@@ -353,9 +287,7 @@ public class PassthroughRequest<T> {
     }
 
     /**
-     *
-     * @return
-     * The cognitoAuthenticationType
+     * @return The cognitoAuthenticationType
      */
     @JsonProperty("cognito-authentication-type")
     public String getCognitoAuthenticationType() {
@@ -363,9 +295,7 @@ public class PassthroughRequest<T> {
     }
 
     /**
-     *
-     * @param cognitoAuthenticationType
-     * The cognito-authentication-type
+     * @param cognitoAuthenticationType The cognito-authentication-type
      */
     @JsonProperty("cognito-authentication-type")
     public void setCognitoAuthenticationType(String cognitoAuthenticationType) {
@@ -373,9 +303,7 @@ public class PassthroughRequest<T> {
     }
 
     /**
-     *
-     * @return
-     * The cognitoIdentityId
+     * @return The cognitoIdentityId
      */
     @JsonProperty("cognito-identity-id")
     public String getCognitoIdentityId() {
@@ -383,9 +311,7 @@ public class PassthroughRequest<T> {
     }
 
     /**
-     *
-     * @param cognitoIdentityId
-     * The cognito-identity-id
+     * @param cognitoIdentityId The cognito-identity-id
      */
     @JsonProperty("cognito-identity-id")
     public void setCognitoIdentityId(String cognitoIdentityId) {
@@ -393,9 +319,7 @@ public class PassthroughRequest<T> {
     }
 
     /**
-     *
-     * @return
-     * The cognitoIdentityPoolId
+     * @return The cognitoIdentityPoolId
      */
     @JsonProperty("cognito-identity-pool-id")
     public String getCognitoIdentityPoolId() {
@@ -403,9 +327,7 @@ public class PassthroughRequest<T> {
     }
 
     /**
-     *
-     * @param cognitoIdentityPoolId
-     * The cognito-identity-pool-id
+     * @param cognitoIdentityPoolId The cognito-identity-pool-id
      */
     @JsonProperty("cognito-identity-pool-id")
     public void setCognitoIdentityPoolId(String cognitoIdentityPoolId) {
@@ -413,9 +335,7 @@ public class PassthroughRequest<T> {
     }
 
     /**
-     *
-     * @return
-     * The httpMethod
+     * @return The httpMethod
      */
     @JsonProperty("http-method")
     public String getHttpMethod() {
@@ -423,9 +343,7 @@ public class PassthroughRequest<T> {
     }
 
     /**
-     *
-     * @param httpMethod
-     * The http-method
+     * @param httpMethod The http-method
      */
     @JsonProperty("http-method")
     public void setHttpMethod(String httpMethod) {
@@ -433,9 +351,7 @@ public class PassthroughRequest<T> {
     }
 
     /**
-     *
-     * @return
-     * The stage
+     * @return The stage
      */
     @JsonProperty("stage")
     public String getStage() {
@@ -443,9 +359,7 @@ public class PassthroughRequest<T> {
     }
 
     /**
-     *
-     * @param stage
-     * The stage
+     * @param stage The stage
      */
     @JsonProperty("stage")
     public void setStage(String stage) {
@@ -453,9 +367,7 @@ public class PassthroughRequest<T> {
     }
 
     /**
-     *
-     * @return
-     * The sourceIp
+     * @return The sourceIp
      */
     @JsonProperty("source-ip")
     public String getSourceIp() {
@@ -463,9 +375,7 @@ public class PassthroughRequest<T> {
     }
 
     /**
-     *
-     * @param sourceIp
-     * The source-ip
+     * @param sourceIp The source-ip
      */
     @JsonProperty("source-ip")
     public void setSourceIp(String sourceIp) {
@@ -473,9 +383,7 @@ public class PassthroughRequest<T> {
     }
 
     /**
-     *
-     * @return
-     * The user
+     * @return The user
      */
     @JsonProperty("user")
     public String getUser() {
@@ -483,9 +391,7 @@ public class PassthroughRequest<T> {
     }
 
     /**
-     *
-     * @param user
-     * The user
+     * @param user The user
      */
     @JsonProperty("user")
     public void setUser(String user) {
@@ -493,9 +399,7 @@ public class PassthroughRequest<T> {
     }
 
     /**
-     *
-     * @return
-     * The userAgent
+     * @return The userAgent
      */
     @JsonProperty("user-agent")
     public String getUserAgent() {
@@ -503,9 +407,7 @@ public class PassthroughRequest<T> {
     }
 
     /**
-     *
-     * @param userAgent
-     * The user-agent
+     * @param userAgent The user-agent
      */
     @JsonProperty("user-agent")
     public void setUserAgent(String userAgent) {
@@ -513,9 +415,7 @@ public class PassthroughRequest<T> {
     }
 
     /**
-     *
-     * @return
-     * The userArn
+     * @return The userArn
      */
     @JsonProperty("user-arn")
     public String getUserArn() {
@@ -523,9 +423,7 @@ public class PassthroughRequest<T> {
     }
 
     /**
-     *
-     * @param userArn
-     * The user-arn
+     * @param userArn The user-arn
      */
     @JsonProperty("user-arn")
     public void setUserArn(String userArn) {
@@ -533,9 +431,7 @@ public class PassthroughRequest<T> {
     }
 
     /**
-     *
-     * @return
-     * The requestId
+     * @return The requestId
      */
     @JsonProperty("request-id")
     public String getRequestId() {
@@ -543,9 +439,7 @@ public class PassthroughRequest<T> {
     }
 
     /**
-     *
-     * @param requestId
-     * The request-id
+     * @param requestId The request-id
      */
     @JsonProperty("request-id")
     public void setRequestId(String requestId) {
@@ -553,9 +447,7 @@ public class PassthroughRequest<T> {
     }
 
     /**
-     *
-     * @return
-     * The resourceId
+     * @return The resourceId
      */
     @JsonProperty("resource-id")
     public String getResourceId() {
@@ -563,9 +455,7 @@ public class PassthroughRequest<T> {
     }
 
     /**
-     *
-     * @param resourceId
-     * The resource-id
+     * @param resourceId The resource-id
      */
     @JsonProperty("resource-id")
     public void setResourceId(String resourceId) {
@@ -573,9 +463,7 @@ public class PassthroughRequest<T> {
     }
 
     /**
-     *
-     * @return
-     * The resourcePath
+     * @return The resourcePath
      */
     @JsonProperty("resource-path")
     public String getResourcePath() {
@@ -583,9 +471,7 @@ public class PassthroughRequest<T> {
     }
 
     /**
-     *
-     * @param resourcePath
-     * The resource-path
+     * @param resourcePath The resource-path
      */
     @JsonProperty("resource-path")
     public void setResourcePath(String resourcePath) {

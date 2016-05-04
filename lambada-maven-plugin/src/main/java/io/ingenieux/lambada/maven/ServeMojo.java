@@ -45,6 +45,7 @@ import io.ingenieux.lambada.invoker.Invoker;
 import io.ingenieux.lambada.invoker.UserHandlerFactory;
 import io.ingenieux.lambada.runtime.ApiGateway;
 import io.ingenieux.lambada.runtime.LambadaFunction;
+import io.ingenieux.lambada.runtime.LambadaUtils;
 import io.ingenieux.lambada.runtime.model.PassthroughRequest;
 import io.ingenieux.lambada.testing.LambadaContext;
 import spark.Request;
@@ -351,7 +352,7 @@ public class ServeMojo extends AbstractLambadaMetadataMojo {
             > 2;
 
     if (looksLikePassthrough) {
-      node = PassthroughRequest.getRequest(OBJECT_MAPPER, JsonNode.class, new ByteArrayInputStream(bodyJsonNode.getBytes(Charset.defaultCharset())));
+      node = LambadaUtils.getRequest(OBJECT_MAPPER, JsonNode.class, new ByteArrayInputStream(bodyJsonNode.getBytes(Charset.defaultCharset())));
 
       node.getStageVariables().putAll(this.stageVariables);
 
