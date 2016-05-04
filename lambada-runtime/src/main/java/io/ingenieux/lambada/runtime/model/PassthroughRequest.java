@@ -24,12 +24,14 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -41,11 +43,33 @@ public class PassthroughRequest<T> {
   }
 
   public static <T> PassthroughRequest<T> getRequest(ObjectMapper mapper, Class<T> clazz, InputStream inputStream) throws IOException {
-    final TypeFactory typeFactory = mapper.getTypeFactory();
-
-    final JavaType typeReference = typeFactory.constructParametrizedType(PassthroughRequest.class, PassthroughRequest.class, clazz);
+    final JavaType typeReference = getReferenceFor(mapper, clazz);
 
     return mapper.readValue(inputStream, typeReference);
+  }
+
+  public static <T> PassthroughRequest<T> getRequest(ObjectMapper mapper, Class<T> clazz, JsonNode node) throws IOException {
+    final JavaType typeReference = getReferenceFor(mapper, clazz);
+
+    return mapper.convertValue(node, typeReference);
+  }
+
+  public static <T> PassthroughRequest<T> getRequest(ObjectMapper mapper, Class<T> clazz, String nodeJsonContent) throws IOException {
+    final JavaType typeReference = getReferenceFor(mapper, clazz);
+
+    return mapper.convertValue(nodeJsonContent, typeReference);
+  }
+
+  public static <T> PassthroughRequest<T> getRequest(ObjectMapper mapper, Class<T> clazz, Reader node) throws IOException {
+    final JavaType typeReference = getReferenceFor(mapper, clazz);
+
+    return mapper.convertValue(node, typeReference);
+  }
+
+  static <T> JavaType getReferenceFor(ObjectMapper mapper, Class<T> clazz) {
+    final TypeFactory typeFactory = mapper.getTypeFactory();
+
+    return typeFactory.constructParametrizedType(PassthroughRequest.class, PassthroughRequest.class, clazz);
   }
 
   @JsonProperty("body-json")
