@@ -21,7 +21,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Tag Annotation for API Gateway (Lambda) Functions
+ * <p>Represents a Patch Operation, according to RFC 6902.</p>
+ *
+ * @see <a href="https://jsonpatch.com/">jsonpatch.com</a>
+ *
  */
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Patch {
