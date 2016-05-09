@@ -17,23 +17,18 @@
 package io.ingenieux.lambada.maven;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.JsonNodeType;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
-import com.github.mustachejava.MustacheFactory;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.StringReader;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -45,9 +40,12 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import io.ingenieux.lambada.maven.util.Unthrow;
 import io.ingenieux.lambada.runtime.ApiGateway;
 import io.ingenieux.lambada.runtime.LambadaFunction;
+import io.ingenieux.lambada.runtime.Patch;
 
+import static java.util.Arrays.asList;
 import static org.codehaus.plexus.util.StringUtils.isNotBlank;
 
 @Mojo(
@@ -86,7 +84,7 @@ public class LambadaGenerateMojo extends AbstractLambadaMetadataMojo {
     // TODO: Validate clashing paths
 
     final TreeSet<LambadaFunctionDefinition> definitionTreeSet =
-        methodsAnnotatedWith.stream().map(this::extractFunctionDefinitions).collect(Collectors.toCollection(TreeSet::new));
+        methodsAnnotatedWith.stream().map(f -> Unthrow.wrap(this::extractFunctionDefinitions, f)).collect(Collectors.toCollection(TreeSet::new));
 
     final List<LambadaFunctionDefinition> defList = new ArrayList<>(definitionTreeSet);
 
@@ -108,7 +106,7 @@ public class LambadaGenerateMojo extends AbstractLambadaMetadataMojo {
     return writer.toString();
   }
 
-  private LambadaFunctionDefinition extractFunctionDefinitions(Method m) {
+  private LambadaFunctionDefinition extractFunctionDefinitions(Method m) throws Exception {
     LambadaFunction lF = m.getAnnotation(LambadaFunction.class);
 
     final LambadaFunctionDefinition result = new LambadaFunctionDefinition();
@@ -135,7 +133,7 @@ public class LambadaGenerateMojo extends AbstractLambadaMetadataMojo {
       result.setDescription(lF.description()); // #5
     }
 
-    result.setBindings(Arrays.asList(lF.bindings()));
+    result.setBindings(asList(lF.bindings()));
 
     if (null != lF.api() && 1 == lF.api().length) {
       ApiGateway apiGatewayAnn = lF.api()[0];
@@ -147,8 +145,55 @@ public class LambadaGenerateMojo extends AbstractLambadaMetadataMojo {
       def.setTemplate(apiGatewayAnn.template());
       def.setCorsEnabled(apiGatewayAnn.corsEnabled());
 
+      def.setPatches(compilePatches(apiGatewayAnn.patches()));
+
       result.setApi(def);
     }
+
+    return result;
+  }
+
+  private JsonNode compilePatches(Patch[] patches) throws IOException {
+    if (null != patches && 0 == patches.length) return null;
+
+    ArrayNode result = OBJECT_MAPPER.createArrayNode();
+
+    result.addAll(
+        Arrays.stream(patches)
+            .map(
+                p ->
+                    Unthrow.wrap(
+                        patch -> {
+                          ObjectNode resultNode = OBJECT_MAPPER.createObjectNode();
+
+                          resultNode.put("op", patch.patchType().name().toLowerCase());
+
+                          resultNode.put("path", patch.path());
+
+                          if (isNotBlank(patch.patchValue())) {
+                            final String sourceValue = patch.patchValue();
+
+                            if (-1 != "{[\"".indexOf(sourceValue.charAt(0))) {
+                              resultNode.set("value", resultNode.textNode(sourceValue));
+                            } else {
+                              resultNode.put("value", sourceValue);
+                            }
+                          } else if (isNotBlank(patch.from())) {
+                            final String sourceValue = patch.from();
+
+                            if (-1 != "{[\"".indexOf(sourceValue.charAt(0))) {
+                              resultNode.set("from", resultNode.textNode(sourceValue));
+                            } else {
+                              resultNode.put("from", sourceValue);
+                            }
+                          } else {
+                            throw new IllegalStateException("Missing (from|value) on annotation @Patch");
+                          }
+
+                          return resultNode;
+                        },
+                        p))
+            .collect(Collectors.toList()));
 
     return result;
   }

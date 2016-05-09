@@ -17,6 +17,8 @@
 
 package io.ingenieux.lambada.maven;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 public class APIGatewayDefinition {
   String path;
 
@@ -65,5 +67,15 @@ public class APIGatewayDefinition {
     HEAD,
     PATCH,
     PUT
+  }
+
+  JsonNode patches;
+
+  public JsonNode getPatches() {
+    return patches;
+  }
+
+  public void setPatches(JsonNode patches) {
+    this.patches = patches;
   }
 }

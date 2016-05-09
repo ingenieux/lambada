@@ -187,8 +187,7 @@ public class PassthroughRequest<T> {
     @JsonProperty("resource-path")
     private String resourcePath;
 
-    @JsonIgnore
-    private Map<String, Object> additionalProperties = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+    @JsonIgnore private Map<String, Object> additionalProperties = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
     /**
      * @return The accountId

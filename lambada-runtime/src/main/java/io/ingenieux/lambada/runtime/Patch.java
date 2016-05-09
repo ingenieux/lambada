@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
 package io.ingenieux.lambada.runtime;
@@ -23,38 +24,19 @@ import java.lang.annotation.RetentionPolicy;
  * Tag Annotation for API Gateway (Lambda) Functions
  */
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ApiGateway {
-  public enum MethodType {
-    GET,
-    POST,
-    DELETE,
-    HEAD,
-    PATCH,
-    PUT
+public @interface Patch {
+  enum PatchType {
+    Add,
+    Remove,
+    Replace,
+    Move,
   }
 
-  /**
-   * Function name. Defaults to method name
-   */
-  String path() default "";
+  PatchType patchType();
 
-  /**
-   * Method Type
-   */
-  MethodType method() default MethodType.POST;
+  String path();
 
-  /**
-   * Template to use (default: default)
-   */
-  String template() default "default";
+  String patchValue() default "";
 
-  /**
-   * True if CORS-enabled
-   */
-  boolean corsEnabled() default true;
-
-  /**
-   * Json Patches (RFC 6902) to apply on the template
-   */
-  Patch[] patches() default {};
+  String from() default "";
 }
