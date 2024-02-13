@@ -67,7 +67,7 @@ public abstract class AbstractLambadaMetadataMojo extends AbstractMojo {
           .setSerializationInclusion(JsonInclude.Include.NON_DEFAULT);
 
   protected String defaultIfBlank(String one, String another) {
-    return (null != one && (!one.trim().equals(""))) ? one : another;
+    return (null != one && (!"".equals(one.trim()))) ? one : another;
   }
 
   public void setClasspathUrls(ConfigurationBuilder configurationBuilder) {
